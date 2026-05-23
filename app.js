@@ -112,7 +112,7 @@ function renderProfileOptions(selectedKey = currentPoolKey()) {
     setValue("poolProfile", Object.keys(profileSettings)[0] || defaultProfileKey);
   }
 
-  $("deleteProfile").disabled = profileCount() <= 1;
+  if ($("deleteProfile")) $("deleteProfile").disabled = profileCount() <= 1;
 }
 
 function selected(name) {
@@ -122,6 +122,10 @@ function selected(name) {
 function setRadio(name, value) {
   const input = document.querySelector(`input[name="${name}"][value="${value}"]`);
   if (input) input.checked = true;
+}
+
+function normalizedSurface(value) {
+  return value === "plaster" || value === "render" ? "concrete" : value;
 }
 
 function numberValue(id) {
@@ -177,7 +181,7 @@ function chemicalName(id, fallback) {
 }
 
 function currentPoolKey() {
-  return $("poolProfile").value;
+  return $("poolProfile") ? $("poolProfile").value : defaultProfileKey;
 }
 
 function currentPool() {
@@ -280,7 +284,7 @@ function useCalculatedVolume() {
   profileSettings[key] = {
     ...(profileSettings[key] || {}),
     sanitizer: selected("sanitizer"),
-    surface: $("surfaceType").value,
+    surface: normalizedSurface($("surfaceType").value),
     volume
   };
   setValue("poolVolume", Math.round(volume));
@@ -469,7 +473,7 @@ function setTargetsFromProfile() {
 
 function savePoolSettings(key = currentPoolKey()) {
   const existing = profileSettings[key] || {};
-  const surface = $("surfaceType").value === "plaster" ? "render" : $("surfaceType").value;
+  const surface = normalizedSurface($("surfaceType").value);
   const name = $("profileName").value.trim() || existing.name || "My Pool";
   const volume = positiveNumber("poolVolume", existing.volume || poolDefaults[defaultProfileKey].volume);
   profileSettings[key] = {
@@ -488,7 +492,7 @@ function applyPoolProfile(key = currentPoolKey()) {
   setValue("poolVolume", Math.round(volume));
   if ($("poolVolumeDisplay")) $("poolVolumeDisplay").textContent = formatPoolVolume(volume);
   setValue("profileName", settings.name || "My Pool");
-  const surface = settings.surface === "plaster" ? "render" : settings.surface || poolDefaults[defaultProfileKey].surface;
+  const surface = normalizedSurface(settings.surface) || poolDefaults[defaultProfileKey].surface;
   setValue("surfaceType", surface);
   setRadio("sanitizer", settings.sanitizer || "chlorine");
   lastPoolKey = key;
@@ -498,9 +502,8 @@ function applyPoolProfile(key = currentPoolKey()) {
 
 function updateVisibility() {
   const sanitizer = selected("sanitizer");
-  const testSet = selected("testSet");
   const isBromine = sanitizer === "bromine";
-  const isFull = testSet === "full";
+  const isFull = true;
   const isSalt = usesSaltReading();
   const cyaAllowed = activePoolAllowsCya();
 
@@ -516,14 +519,13 @@ function updateVisibility() {
   all(".target-salt").forEach((node) => node.classList.toggle("is-hidden", !isSalt));
 
   $("poolVolumeDisplay").textContent = formatPoolVolume(currentPoolVolumeLitres());
-  $("testSetHint").textContent = testSet === "full" ? "Weekly test" : "Daily test";
 }
 
 function saveState() {
   savePoolSettings();
   const state = {
     activePool: currentPoolKey(),
-    testSet: selected("testSet"),
+    testSet: "full",
     unitSystem: currentUnitSystem(),
     concentrationUnit: selected("concentrationUnit"),
     profiles: profileSettings,
@@ -558,7 +560,7 @@ function loadState() {
     const activePool = profileSettings[state.activePool] ? state.activePool : Object.keys(profileSettings)[0] || defaultProfileKey;
     renderProfileOptions(activePool);
     setValue("poolProfile", activePool);
-    if (state.testSet) setRadio("testSet", state.testSet);
+    setRadio("testSet", "full");
     if (state.unitSystem) setRadio("unitSystem", state.unitSystem);
     if (state.concentrationUnit) setRadio("concentrationUnit", state.concentrationUnit);
     applyPoolProfile(currentPoolKey());
@@ -601,7 +603,6 @@ function calculate() {
 
   const cards = [];
   const sanitizer = selected("sanitizer");
-  const testSet = selected("testSet");
   const alkalinity = numberValue("alkalinity");
   const liquidStrength = positiveNumber("liquidChlorineStrength", 12.5);
   const granularStrength = positiveNumber("granularChlorineStrength", 65);
@@ -615,12 +616,10 @@ function calculate() {
 
   calculatePh(cards, volume, alkalinity, hydrochloricStrength);
 
-  if (testSet === "full") {
-    calculateAlkalinity(cards, volume, hydrochloricStrength);
-    calculateCalcium(cards, volume);
-    calculateCya(cards, volume, sanitizer);
-    calculateSalt(cards, volume, sanitizer);
-  }
+  calculateAlkalinity(cards, volume, hydrochloricStrength);
+  calculateCalcium(cards, volume);
+  calculateCya(cards, volume, sanitizer);
+  calculateSalt(cards, volume, sanitizer);
 
   if (cards.length === 0 && hasAnyReading()) {
     cards.push({
@@ -1154,8 +1153,7 @@ function historyBaseEntry(kind) {
     volumeLitres: poolVolumeLitres(),
     displayedVolume: formatPoolVolume(poolVolumeLitres()),
     sanitizer: selected("sanitizer"),
-    surface: $("surfaceType").value === "plaster" ? "render" : $("surfaceType").value,
-    testSet: selected("testSet")
+    surface: normalizedSurface($("surfaceType").value)
   };
 }
 
@@ -1528,9 +1526,9 @@ function bindEvents() {
   });
 
   $("useCalculatedVolume").addEventListener("click", useCalculatedVolume);
-  $("newProfile").addEventListener("click", newProfile);
-  $("saveProfile").addEventListener("click", saveCurrentProfile);
-  $("deleteProfile").addEventListener("click", deleteCurrentProfile);
+  if ($("newProfile")) $("newProfile").addEventListener("click", newProfile);
+  if ($("saveProfile")) $("saveProfile").addEventListener("click", saveCurrentProfile);
+  if ($("deleteProfile")) $("deleteProfile").addEventListener("click", deleteCurrentProfile);
   $("saveTargets").addEventListener("click", () => {
     saveState();
     showPage("calculator");
@@ -1588,7 +1586,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-refine", {
+    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-simple-profile", {
       updateViaCache: "none"
     }).catch(() => {});
   });

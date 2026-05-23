@@ -10,12 +10,12 @@
     <meta name="application-name" content="POOLZ">
     <meta name="description" content="POOLZ pool chemistry and dosing calculator.">
     <title>POOLZ</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260524-poolz-refine">
+    <link rel="manifest" href="manifest.webmanifest?v=20260524-poolz-simple-profile">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png">
     <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png">
-    <link rel="stylesheet" href="styles.css?v=20260524-poolz-refine">
-    <script defer src="app.js?v=20260524-poolz-refine"></script>
+    <link rel="stylesheet" href="styles.css?v=20260524-poolz-simple-profile">
+    <script defer src="app.js?v=20260524-poolz-simple-profile"></script>
   </head>
   <body>
     <header class="topbar">
@@ -57,14 +57,12 @@
         <div class="layout">
           <section class="workbench" aria-label="Pool chemistry inputs">
             <section class="panel">
-              <div class="form-grid setup-grid">
-                <label class="field pool-profile-field">
-                  <span>Pool profile</span>
-                  <select id="poolProfile">
-                    <option value="my-pool">My Pool</option>
-                  </select>
-                </label>
+              <select id="poolProfile" hidden>
+                <option value="my-pool">My Pool</option>
+              </select>
+              <input type="radio" name="testSet" value="full" checked hidden>
 
+              <div class="form-grid setup-grid">
                 <label class="field profile-name-field">
                   <span>Profile name</span>
                   <input id="profileName" type="text" value="My Pool" autocomplete="off">
@@ -78,7 +76,7 @@
                 <label class="field surface-field">
                   <span>Surface</span>
                   <select id="surfaceType">
-                    <option value="render">Render</option>
+                    <option value="concrete">Concrete</option>
                     <option value="fibreglass">Fibreglass</option>
                     <option value="vinyl">Vinyl</option>
                   </select>
@@ -92,11 +90,6 @@
                   <label><input type="radio" name="sanitizer" value="bromine"><span>Bromine</span></label>
                 </fieldset>
 
-                <fieldset class="segmented test-segment" aria-label="Test set">
-                  <label><input type="radio" name="testSet" value="basic" checked><span>Daily</span></label>
-                  <label><input type="radio" name="testSet" value="full"><span>Weekly</span></label>
-                </fieldset>
-
                 <fieldset class="segmented unit-segment" aria-label="Pool volume units">
                   <legend>Units</legend>
                   <label><input type="radio" name="unitSystem" value="litres" checked><span>Litres</span></label>
@@ -108,19 +101,12 @@
                   <label><input type="radio" name="concentrationUnit" value="ppm" checked><span>ppm</span></label>
                   <label><input type="radio" name="concentrationUnit" value="mgL"><span>mg/L</span></label>
                 </fieldset>
-
-                <div class="profile-actions">
-                  <button id="newProfile" class="secondary-button" type="button">New profile</button>
-                  <button id="saveProfile" class="primary-button" type="button">Save profile</button>
-                  <button id="deleteProfile" class="secondary-button" type="button">Delete profile</button>
-                </div>
               </div>
             </section>
 
             <section class="panel">
               <div class="section-title">
                 <h2>Test Results</h2>
-                <span id="testSetHint">Daily test</span>
               </div>
 
               <div id="readingsGrid" class="form-grid readings-grid">
@@ -450,12 +436,12 @@
 
             <div class="notes-grid">
               <article>
-                <strong>Daily</strong>
-                <span>Free chlorine, total chlorine, combined chlorine and pH.</span>
+                <strong>Core tests</strong>
+                <span>Free chlorine, total chlorine, combined chlorine, pH and temperature.</span>
               </article>
               <article>
-                <strong>Weekly</strong>
-                <span>Add alkalinity, calcium hardness, stabiliser if used, and salt for salt pools.</span>
+                <strong>Extra readings</strong>
+                <span>Alkalinity, calcium hardness, stabiliser if used, and salt for salt or mineral pools.</span>
               </article>
               <article>
                 <strong>Indoor CYA</strong>
