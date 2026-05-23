@@ -30,9 +30,12 @@ body {
   min-height: 100%;
   margin: 0;
   background:
-    linear-gradient(180deg, rgba(3, 169, 230, 0.14), rgba(242, 245, 244, 0) 260px),
-    linear-gradient(90deg, rgba(0, 58, 120, 0.06), rgba(53, 204, 255, 0) 32%, rgba(3, 169, 230, 0.06)),
+    radial-gradient(130% 54% at 50% -22%, rgba(3, 169, 230, 0.30) 0 52%, rgba(3, 169, 230, 0) 53%),
+    radial-gradient(115% 46% at 52% 0%, rgba(0, 87, 184, 0.14) 0 45%, rgba(0, 87, 184, 0) 46%),
+    linear-gradient(180deg, rgba(219, 247, 255, 0.94), rgba(242, 245, 244, 0) 360px),
+    linear-gradient(120deg, rgba(0, 58, 120, 0.08), rgba(53, 204, 255, 0.08) 44%, rgba(255, 255, 255, 0) 76%),
     var(--bg);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 16px;
@@ -54,23 +57,30 @@ button {
 }
 
 .topbar {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 20px;
   max-width: 1440px;
   margin: 0 auto;
-  padding: 24px 28px 12px;
+  padding: 28px 28px 14px;
 }
 
 .brand-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 14px;
+  width: 100%;
   min-width: 0;
 }
 
 .icon-button {
+  position: absolute;
+  top: 30px;
+  left: 28px;
+  z-index: 2;
   display: grid;
   align-content: center;
   gap: 5px;
@@ -78,9 +88,11 @@ button {
   height: 42px;
   flex: 0 0 auto;
   padding: 9px;
-  border: 1px solid #cfd8d5;
+  border: 1px solid rgba(0, 58, 120, 0.16);
   border-radius: 8px;
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 14px 32px rgba(0, 47, 104, 0.12);
+  backdrop-filter: blur(14px);
 }
 
 .icon-button span {
@@ -91,10 +103,11 @@ button {
 }
 
 .brand {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
   min-width: 0;
+  text-align: center;
 }
 
 .brand h1,
@@ -103,29 +116,39 @@ button {
 }
 
 .brand h1 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
   font-size: 1.45rem;
   line-height: 1.2;
 }
 
 .brand p {
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: 0.95rem;
+  margin-top: -4px;
+  color: var(--teal-dark);
+  font-size: 0.98rem;
+  font-weight: 850;
 }
 
 .brand-logo {
-  width: min(300px, 36vw);
-  max-width: 300px;
-  min-width: 180px;
-  height: 76px;
+  width: min(560px, 78vw);
+  max-width: 560px;
+  min-width: 240px;
+  height: auto;
+  max-height: 190px;
   object-fit: contain;
-  object-position: left center;
+  object-position: center;
   flex: 0 1 auto;
-  padding: 8px 10px;
-  border: 1px solid rgba(5, 9, 10, 0.08);
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 8px 22px rgba(5, 9, 10, 0.08);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  filter: drop-shadow(0 18px 28px rgba(0, 47, 104, 0.20));
 }
 
 .drawer-overlay {
@@ -251,10 +274,11 @@ button {
 
 .panel,
 .results-panel {
-  border: 1px solid var(--line);
+  border: 1px solid rgba(3, 169, 230, 0.16);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: var(--shadow);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 24px 70px rgba(0, 47, 104, 0.12);
+  backdrop-filter: blur(18px);
 }
 
 .panel {
@@ -588,7 +612,6 @@ details summary strong {
   line-height: 1.35;
 }
 
-.chemical-name-grid,
 .notes-grid,
 .install-grid {
   display: grid;
@@ -597,7 +620,6 @@ details summary strong {
   margin-bottom: 16px;
 }
 
-.chemical-name-grid div,
 .notes-grid article,
 .install-grid article {
   display: grid;
@@ -609,14 +631,12 @@ details summary strong {
   background: var(--surface-soft);
 }
 
-.chemical-name-grid strong,
 .notes-grid strong,
 .install-grid strong {
   color: #263431;
   font-size: 0.88rem;
 }
 
-.chemical-name-grid span,
 .notes-grid span,
 .install-grid span {
   color: var(--muted);
@@ -872,7 +892,6 @@ details summary strong {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .chemical-name-grid,
   .notes-grid,
   .install-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -903,25 +922,32 @@ details summary strong {
 
 @media (max-width: 760px) {
   .topbar {
-    align-items: stretch;
-    flex-direction: column;
-    padding: 18px 14px 8px;
+    align-items: center;
+    flex-direction: row;
+    padding: 16px 14px 10px;
   }
 
   .brand-row {
-    align-items: flex-start;
-    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding-top: 40px;
+  }
+
+  .icon-button {
+    top: 16px;
+    left: 14px;
   }
 
   .brand-logo {
-    width: min(150px, 42vw);
-    min-width: 0;
-    height: 46px;
-    padding: 5px 7px;
+    width: min(330px, 82vw);
+    min-width: 210px;
+    height: auto;
+    max-height: 118px;
   }
 
   .brand {
-    gap: 10px;
+    gap: 4px;
   }
 
   .brand h1 {
@@ -946,10 +972,9 @@ details summary strong {
   .chemicals-grid,
   .readings-grid,
   .volume-grid,
-  .chemical-name-grid,
-  .notes-grid,
-  .install-grid {
-    grid-template-columns: 1fr;
+    .notes-grid,
+    .install-grid {
+      grid-template-columns: 1fr;
   }
 
   .pool-profile-field,

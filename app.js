@@ -33,12 +33,21 @@ const valueIds = [
   "targetCalcium",
   "targetCya",
   "targetSalt",
+  "liquidChlorineName",
   "liquidChlorineStrength",
+  "granularChlorineName",
   "granularChlorineStrength",
+  "acidName",
   "muriaticStrength",
+  "dryAcidName",
+  "phUpName",
+  "bromineName",
   "bromineStrength",
+  "calciumName",
   "calciumPurity",
-  "stabilizerPurity"
+  "stabilizerName",
+  "stabilizerPurity",
+  "saltName"
 ];
 
 const readingIds = [
@@ -120,6 +129,38 @@ function numberValue(id) {
   return Number.isFinite(value) ? value : null;
 }
 
+function decimalPlacesFromText(text) {
+  const match = String(text).trim().match(/^-?\d+(?:\.(\d+))?$/);
+  return match ? (match[1] || "").length : 0;
+}
+
+function scaledDecimalFromText(text, places) {
+  const trimmed = String(text).trim();
+  if (!/^-?\d+(?:\.\d+)?$/.test(trimmed)) return null;
+
+  const sign = trimmed.startsWith("-") ? -1 : 1;
+  const unsigned = trimmed.replace(/^-/, "");
+  const [whole, fraction = ""] = unsigned.split(".");
+  const scale = 10 ** places;
+  const scaledFraction = (fraction + "0".repeat(places)).slice(0, places);
+  return sign * ((Number(whole) * scale) + Number(scaledFraction || 0));
+}
+
+function subtractDecimalInputs(leftId, rightId) {
+  const left = $(leftId).value;
+  const right = $(rightId).value;
+  const places = Math.min(
+    Math.max(decimalPlacesFromText(left), decimalPlacesFromText(right), 2),
+    6
+  );
+  const scale = 10 ** places;
+  const leftScaled = scaledDecimalFromText(left, places);
+  const rightScaled = scaledDecimalFromText(right, places);
+
+  if (leftScaled === null || rightScaled === null) return null;
+  return (leftScaled - rightScaled) / scale;
+}
+
 function positiveNumber(id, fallback) {
   const value = numberValue(id);
   return value !== null && value > 0 ? value : fallback;
@@ -127,6 +168,12 @@ function positiveNumber(id, fallback) {
 
 function setValue(id, value) {
   $(id).value = value === null || value === undefined ? "" : String(value);
+}
+
+function chemicalName(id, fallback) {
+  const input = $(id);
+  const value = input ? input.value.trim() : "";
+  return value || fallback;
 }
 
 function currentPoolKey() {
@@ -253,7 +300,8 @@ function syncCombinedChlorine() {
   const total = numberValue("totalChlorine");
 
   if (free !== null && total !== null) {
-    const rawCombined = total - free;
+    const rawCombined = subtractDecimalInputs("totalChlorine", "freeChlorine");
+    if (rawCombined === null) return null;
     const combined = Math.max(rawCombined, 0);
     const combinedDisplay = formatTruncatedDecimal(combined, 2);
     setValue("combinedChlorine", combinedDisplay);
@@ -598,6 +646,8 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
   const target = positiveNumber("targetChlorine", currentDefaultTargets().chlorine);
   const combinedAction = positiveNumber("targetCombined", 1);
   const unit = concentrationUnitSuffix();
+  const liquidName = chemicalName("liquidChlorineName", "liquid chlorine");
+  const granularName = chemicalName("granularChlorineName", "granular chlorine");
 
   if (free !== null) {
     if (free < target - 0.1) {
@@ -608,15 +658,15 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
         title: "Raise free chlorine",
         badge: "dose",
         amount: formatVolume(liquidMl),
-        chemical: `${formatNumber(liquidStrength, 1)}% liquid chlorine`,
+        chemical: `${formatNumber(liquidStrength, 1)}% ${liquidName}`,
         body: `Raises free chlorine by about ${formatNumber(delta, 1)}${unit} to ${formatNumber(target, 1)}${unit}.`,
         effect: "Raises the active sanitiser residual. Liquid chlorine can also slowly add salt and nudge pH upward.",
         steps: [
-          `Add ${formatVolume(liquidMl)} with the pump running.`,
+          `Add ${formatVolume(liquidMl)} ${liquidName} with the pump running.`,
           "Circulate, then retest free and total chlorine.",
           "Low chlorine is usually from bather load, sunlight, or organic demand."
         ],
-        alt: [`Alternative: ${formatMass(granularGrams)} of ${formatNumber(granularStrength, 1)}% granular chlorine.`]
+        alt: [`Alternative: ${formatMass(granularGrams)} of ${formatNumber(granularStrength, 1)}% ${granularName}.`]
       });
     } else if (free > target + 1.5) {
       cards.push({
@@ -663,12 +713,12 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
       title: "Combined chlorine over limit",
       badge: "stop",
       amount: breakpointDelta > 0 ? liquidDose : "Retest",
-      chemical: breakpointDelta > 0 ? `${formatNumber(liquidStrength, 1)}% liquid chlorine` : "combined chlorine",
+      chemical: breakpointDelta > 0 ? `${formatNumber(liquidStrength, 1)}% ${liquidName}` : "combined chlorine",
       body: `Combined chlorine is ${formatTruncatedDecimal(combinedLevel, 2)}${unit}. Breakpoint target is about ${formatTruncatedDecimal(breakpointTarget, 2)}${unit} free chlorine.`,
       effect: "Combined chlorine is used-up chlorine. It is usually high after bather load, organics, low oxidation, or poor indoor ventilation.",
       steps: breakpointDelta > 0
         ? [
-            `Add ${liquidDose} liquid chlorine with the pump running.`,
+            `Add ${liquidDose} ${liquidName} with the pump running.`,
             "Keep bathers out, circulate and ventilate, then retest free, total and combined chlorine.",
             `Goal: combined chlorine back under ${formatTruncatedDecimal(combinedAction, 2)}${unit}.`
           ]
@@ -678,7 +728,7 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
             `Goal: combined chlorine back under ${formatTruncatedDecimal(combinedAction, 2)}${unit}.`
           ],
       alt: breakpointDelta > 0
-        ? [`Granular chlorine option: ${granularDose} of ${formatNumber(granularStrength, 1)}% granular chlorine.`]
+        ? [`${granularName} option: ${granularDose} of ${formatNumber(granularStrength, 1)}% ${granularName}.`]
         : []
     });
   } else if (combinedLevel !== null) {
@@ -698,6 +748,7 @@ function calculateBromine(cards, volume) {
   const target = positiveNumber("targetBromine", 4);
   const strength = positiveNumber("bromineStrength", 61);
   const unit = concentrationUnitSuffix();
+  const bromineName = chemicalName("bromineName", "bromine granules");
 
   if (bromine === null) return;
 
@@ -708,11 +759,11 @@ function calculateBromine(cards, volume) {
       title: "Raise bromine",
       badge: "dose",
       amount: formatMass(grams),
-      chemical: `${formatNumber(strength, 1)}% bromine granules`,
+      chemical: `${formatNumber(strength, 1)}% ${bromineName}`,
       body: `Raises total bromine by about ${formatNumber(delta, 1)}${unit} to ${formatNumber(target, 1)}${unit}.`,
       effect: "Raises the bromine sanitiser residual so the water can keep disinfecting between bather loads.",
       steps: [
-        `Add ${formatMass(grams)} with the pump running.`,
+        `Add ${formatMass(grams)} ${bromineName} with the pump running.`,
         "Circulate, then retest bromine.",
         "Low bromine is usually from bather load, organic demand, or feeder output set too low."
       ]
@@ -737,6 +788,9 @@ function calculateBromine(cards, volume) {
 function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
   const ph = numberValue("ph");
   const target = positiveNumber("targetPh", selected("sanitizer") === "bromine" ? 7.6 : 7.5);
+  const acidName = chemicalName("acidName", "hydrochloric acid");
+  const dryAcidName = chemicalName("dryAcidName", "dry acid");
+  const phUpName = chemicalName("phUpName", "sodium bicarbonate");
 
   if (ph === null) return;
 
@@ -749,15 +803,15 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
       title: "Lower pH",
       badge: "dose",
       amount: formatVolume(hydrochloric),
-      chemical: `${formatNumber(hydrochloricStrength, 1)}% hydrochloric acid`,
+      chemical: `${formatNumber(hydrochloricStrength, 1)}% ${acidName}`,
       body: `Estimated drop from pH ${formatNumber(ph, 1)} to ${formatNumber(target, 1)}.${splitNote}`,
       effect: "Lowers pH and also lowers total alkalinity a little.",
       steps: [
-        `Add ${formatVolume(hydrochloric)} acid carefully with the pump running.`,
+        `Add ${formatVolume(hydrochloric)} ${acidName} carefully with the pump running.`,
         "Circulate and retest pH before adding more.",
         "High pH is often from aeration, liquid chlorine, or high alkalinity."
       ],
-      alt: [`Dry acid option: ${formatMass(dryAcid)}.`]
+      alt: [`${dryAcidName} option: ${formatMass(dryAcid)}.`]
     });
   } else if (ph < target - 0.05) {
     const rise = target - ph;
@@ -766,11 +820,11 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
       title: "Raise pH",
       badge: "dose",
       amount: formatMass(sodiumBicarb),
-      chemical: "sodium bicarbonate",
+      chemical: phUpName,
       body: `Estimated slow pH lift from ${formatNumber(ph, 1)} toward ${formatNumber(target, 1)}. Retest after circulation.`,
       effect: "Raises pH slowly and increases total alkalinity.",
       steps: [
-        `Add ${formatMass(sodiumBicarb)} sodium bicarbonate in stages.`,
+        `Add ${formatMass(sodiumBicarb)} ${phUpName} in stages.`,
         "Circulate and retest pH and alkalinity.",
         "Low pH is often from acid overdose, rain/dilution, or low alkalinity."
       ]
@@ -782,6 +836,9 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
   const current = numberValue("alkalinity");
   const target = positiveNumber("targetAlkalinity", 100);
   const unit = concentrationUnitSuffix();
+  const acidName = chemicalName("acidName", "hydrochloric acid");
+  const dryAcidName = chemicalName("dryAcidName", "dry acid");
+  const phUpName = chemicalName("phUpName", "sodium bicarbonate");
 
   if (current === null) return;
 
@@ -791,11 +848,11 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
       title: "Raise alkalinity",
       badge: "dose",
       amount: formatMass(bicarbForAlkalinity(volume, delta)),
-      chemical: "sodium bicarbonate",
+      chemical: phUpName,
       body: `Raises total alkalinity by about ${formatNumber(delta, 0)}${unit}.`,
       effect: "Increases alkalinity, which buffers pH and makes pH changes less sudden.",
       steps: [
-        `Add ${formatMass(bicarbForAlkalinity(volume, delta))} sodium bicarbonate with circulation.`,
+        `Add ${formatMass(bicarbForAlkalinity(volume, delta))} ${phUpName} with circulation.`,
         "Retest alkalinity and pH after mixing.",
         "Low alkalinity makes pH unstable and is often caused by acid or dilution."
       ]
@@ -808,7 +865,7 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
       title: "Lower alkalinity",
       badge: "watch",
       amount: formatVolume(hydrochloric),
-      chemical: "hydrochloric acid total",
+      chemical: `${acidName} total`,
       body: "Use staged acid and aeration cycles; this is not a single-dose instruction.",
       effect: "Lowers total alkalinity and pH; aeration raises pH back up without restoring alkalinity.",
       steps: [
@@ -816,7 +873,7 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
         "Retest pH and alkalinity between stages.",
         "High alkalinity usually comes from source water, too much buffer, or pH-up products."
       ],
-      alt: [`Dry acid equivalent: ${formatMass(dryAcid)}.`]
+      alt: [`${dryAcidName} equivalent: ${formatMass(dryAcid)}.`]
     });
   }
 }
@@ -826,6 +883,7 @@ function calculateCalcium(cards, volume) {
   const target = positiveNumber("targetCalcium", 250);
   const purity = positiveNumber("calciumPurity", 77);
   const unit = concentrationUnitSuffix();
+  const calciumName = chemicalName("calciumName", "calcium chloride");
 
   if (current === null) return;
 
@@ -835,11 +893,11 @@ function calculateCalcium(cards, volume) {
       title: "Raise calcium hardness",
       badge: "dose",
       amount: formatMass(calciumChlorideForHardness(volume, delta, purity)),
-      chemical: `${formatNumber(purity, 1)}% calcium chloride`,
+      chemical: `${formatNumber(purity, 1)}% ${calciumName}`,
       body: `Raises calcium hardness by about ${formatNumber(delta, 0)}${unit}.`,
       effect: "Increases calcium hardness, which helps protect concrete surfaces and tile grout from aggressive water.",
       steps: [
-        `Add ${formatMass(calciumChlorideForHardness(volume, delta, purity))} calcium chloride slowly.`,
+        `Add ${formatMass(calciumChlorideForHardness(volume, delta, purity))} ${calciumName} slowly.`,
         "Brush/circulate well and retest hardness after mixing.",
         "Low hardness can make water aggressive to concrete, grout and tiled finishes."
       ]
@@ -869,6 +927,7 @@ function calculateCya(cards, volume, sanitizer) {
   const target = positiveNumber("targetCya", 30);
   const purity = positiveNumber("stabilizerPurity", 100);
   const unit = concentrationUnitSuffix();
+  const stabilizerName = chemicalName("stabilizerName", "stabiliser");
 
   if (current < target - 5) {
     const delta = target - current;
@@ -876,11 +935,11 @@ function calculateCya(cards, volume, sanitizer) {
       title: "Raise stabiliser",
       badge: "dose",
       amount: formatMass(stabilizerDose(volume, delta, purity)),
-      chemical: `${formatNumber(purity, 1)}% stabiliser`,
+      chemical: `${formatNumber(purity, 1)}% ${stabilizerName}`,
       body: `Raises cyanuric acid by about ${formatNumber(delta, 0)}${unit}.`,
       effect: "Increases stabiliser, which protects chlorine from sunlight but makes high chlorine levels less effective.",
       steps: [
-        `Add ${formatMass(stabilizerDose(volume, delta, purity))} stabiliser slowly.`,
+        `Add ${formatMass(stabilizerDose(volume, delta, purity))} ${stabilizerName} slowly.`,
         "Circulate and retest after it has fully dissolved.",
         "Low stabiliser lets sunlight burn off chlorine faster in outdoor pools."
       ]
@@ -910,6 +969,7 @@ function calculateSalt(cards, volume, sanitizer) {
   const target = positiveNumber("targetSalt", 4000);
   const systemName = sanitizer === "mineral" ? "mineral system" : "salt chlorinator";
   const unit = concentrationUnitSuffix();
+  const saltName = chemicalName("saltName", "pool salt");
 
   if (current < target - 100) {
     const delta = target - current;
@@ -917,11 +977,11 @@ function calculateSalt(cards, volume, sanitizer) {
       title: "Raise salt",
       badge: "dose",
       amount: formatMass(saltDose(volume, delta)),
-      chemical: "pool salt",
+      chemical: saltName,
       body: `Raises salt by about ${formatNumber(delta, 0)}${unit}. Match the ${systemName} manual when it differs from this target.`,
       effect: `Increases salinity so the ${systemName} can operate correctly.`,
       steps: [
-        `Add ${formatMass(saltDose(volume, delta))} salt across the pool surface.`,
+        `Add ${formatMass(saltDose(volume, delta))} ${saltName} across the pool surface.`,
         "Brush/circulate until dissolved, then retest salt.",
         `Low salt can stop the ${systemName} working properly.`
       ]
@@ -1528,7 +1588,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-logo", {
+    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-refine", {
       updateViaCache: "none"
     }).catch(() => {});
   });

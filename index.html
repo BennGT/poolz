@@ -3,19 +3,19 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#087ca5">
+    <meta name="theme-color" content="#003a78">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="POOLZ">
     <meta name="application-name" content="POOLZ">
     <meta name="description" content="POOLZ pool chemistry and dosing calculator.">
     <title>POOLZ</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260524-poolz-logo">
+    <link rel="manifest" href="manifest.webmanifest?v=20260524-poolz-refine">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png">
     <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png">
-    <link rel="stylesheet" href="styles.css?v=20260524-poolz-logo">
-    <script defer src="app.js?v=20260524-poolz-logo"></script>
+    <link rel="stylesheet" href="styles.css?v=20260524-poolz-refine">
+    <script defer src="app.js?v=20260524-poolz-refine"></script>
   </head>
   <body>
     <header class="topbar">
@@ -299,42 +299,80 @@
               <button id="saveChemicals" class="primary-button" type="button">Save chemicals</button>
             </div>
 
-            <div class="chemical-name-grid">
-              <div><strong>Hardness</strong><span>Calcium chloride</span></div>
-              <div><strong>pH up</strong><span>Sodium bicarbonate</span></div>
-              <div><strong>pH down</strong><span>Hydrochloric acid or dry acid</span></div>
-              <div><strong>Stabiliser</strong><span>Cyanuric acid</span></div>
-            </div>
-
             <div class="form-grid chemicals-grid">
               <label class="field">
-                <span>Liquid chlorine</span>
+                <span>Liquid chlorine name</span>
+                <input id="liquidChlorineName" type="text" value="Liquid chlorine" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Liquid chlorine strength</span>
                 <input id="liquidChlorineStrength" type="number" min="1" max="20" step="0.1" value="12.5">
               </label>
 
               <label class="field">
-                <span>Granular chlorine</span>
+                <span>Granular chlorine name</span>
+                <input id="granularChlorineName" type="text" value="Granular chlorine" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Granular chlorine strength</span>
                 <input id="granularChlorineStrength" type="number" min="1" max="100" step="0.1" value="65">
               </label>
 
               <label class="field">
-                <span>Hydrochloric acid</span>
+                <span>Acid name</span>
+                <input id="acidName" type="text" value="Hydrochloric acid" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Acid strength</span>
                 <input id="muriaticStrength" type="number" min="1" max="40" step="0.1" value="31.45">
               </label>
 
               <label class="field">
-                <span>Bromine granules</span>
+                <span>Dry acid name</span>
+                <input id="dryAcidName" type="text" value="Dry acid" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>pH up / buffer name</span>
+                <input id="phUpName" type="text" value="Sodium bicarbonate" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Bromine name</span>
+                <input id="bromineName" type="text" value="Bromine granules" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Bromine strength</span>
                 <input id="bromineStrength" type="number" min="1" max="100" step="0.1" value="61">
               </label>
 
               <label class="field">
-                <span>Calcium chloride</span>
+                <span>Hardness increaser name</span>
+                <input id="calciumName" type="text" value="Calcium chloride" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Hardness increaser strength</span>
                 <input id="calciumPurity" type="number" min="1" max="100" step="0.1" value="77">
               </label>
 
               <label class="field">
-                <span>Stabiliser</span>
+                <span>Stabiliser name</span>
+                <input id="stabilizerName" type="text" value="Stabiliser" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Stabiliser strength</span>
                 <input id="stabilizerPurity" type="number" min="1" max="100" step="0.1" value="100">
+              </label>
+
+              <label class="field">
+                <span>Salt name</span>
+                <input id="saltName" type="text" value="Pool salt" autocomplete="off">
               </label>
             </div>
           </section>
