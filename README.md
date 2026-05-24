@@ -11,6 +11,7 @@ This version is separate from the Rock N Water build in the parent folder. It is
 - Volume calculator using length, width, and average depth.
 - Test result display can switch between ppm and mg/L.
 - Flexible test entry with all core and extended readings available.
+- Calculate button flow with safety reminders shown before dosing results.
 - Editable targets, custom chemical names, and chemical strengths.
 - Local test history with trend charts.
 - Installable web app shell with manifest and service worker.
