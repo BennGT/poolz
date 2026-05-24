@@ -2,11 +2,11 @@
 
 A clean consumer version of the pool chemical dose calculator.
 
-This version is separate from the Rock N Water build in the parent folder. It is set up for personal pool owners to save a simple pool setup on-device.
+This version is separate from the Rock N Water build in the parent folder. It is set up for personal pool owners to save pool setups on-device.
 
 ## Current Features
 
-- Single editable pool setup with name, volume, surface, pool type, and units.
+- My Pool page for creating, switching, editing, and deleting saved pool profiles.
 - Pool types: chlorine, salt, mineral, and bromine.
 - Volume calculator using length, width, and average depth.
 - Test result display can switch between ppm and mg/L.
