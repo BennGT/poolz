@@ -70,6 +70,7 @@ let lastPoolKey = defaultProfileKey;
 let drawerTouchStartX = null;
 let deferredInstallPrompt = null;
 let lastCards = [];
+let resultsVisible = false;
 let historyEntries = [];
 
 const $ = (id) => document.getElementById(id);
@@ -518,7 +519,7 @@ function updateVisibility() {
   all(".salt-field").forEach((node) => node.classList.toggle("is-hidden", !isFull || !isSalt));
   all(".target-salt").forEach((node) => node.classList.toggle("is-hidden", !isSalt));
 
-  $("poolVolumeDisplay").textContent = formatPoolVolume(currentPoolVolumeLitres());
+  if ($("poolVolumeDisplay")) $("poolVolumeDisplay").textContent = formatPoolVolume(currentPoolVolumeLitres());
 }
 
 function saveState() {
@@ -588,7 +589,7 @@ function hasAnyReading() {
   return readingIds.some((id) => numberValue(id) !== null);
 }
 
-function calculate() {
+function calculate({ showResults = false } = {}) {
   updateVisibility();
   syncCombinedChlorine();
 
@@ -596,9 +597,10 @@ function calculate() {
 
   if (!volume || volume <= 0 || !hasAnyReading()) {
     lastCards = [];
-    renderCards([]);
+    resultsVisible = false;
+    renderPendingResults("Enter readings and press Calculate.");
     saveState();
-    return;
+    return [];
   }
 
   const cards = [];
@@ -633,8 +635,15 @@ function calculate() {
   }
 
   lastCards = cards;
-  renderCards(cards);
+  if (showResults) {
+    resultsVisible = true;
+    renderCards(cards);
+  } else {
+    resultsVisible = false;
+    renderPendingResults("Readings updated. Press Calculate to review safety and dosing.");
+  }
   saveState();
+  return cards;
 }
 
 function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
@@ -1003,8 +1012,23 @@ function calculateSalt(cards, volume, sanitizer) {
   }
 }
 
+function renderPendingResults(message) {
+  const results = $("results");
+  if (!results) return;
+
+  const article = document.createElement("article");
+  article.className = "empty-state";
+  const title = document.createElement("strong");
+  title.textContent = "Ready when you are";
+  const body = document.createElement("span");
+  body.textContent = message;
+  article.append(title, body);
+  results.replaceChildren(article);
+}
+
 function renderCards(cards) {
   const results = $("results");
+  if (!results) return;
   results.replaceChildren();
 
   if (!cards.length) {
@@ -1070,6 +1094,39 @@ function renderCards(cards) {
 
     results.append(article);
   });
+}
+
+function showDoseResults() {
+  resultsVisible = true;
+  renderCards(lastCards);
+  saveState();
+}
+
+function openSafetyModal() {
+  const overlay = $("safetyModalOverlay");
+  if (!overlay) {
+    showDoseResults();
+    return;
+  }
+
+  overlay.hidden = false;
+  $("safetyModalDone").focus();
+}
+
+function closeSafetyModal() {
+  const overlay = $("safetyModalOverlay");
+  if (overlay) overlay.hidden = true;
+  showDoseResults();
+}
+
+function handleCalculatePress() {
+  const cards = calculate({ showResults: false });
+
+  if (!hasAnyReading() || !cards.length) {
+    return;
+  }
+
+  openSafetyModal();
 }
 
 const readingLabels = {
@@ -1537,10 +1594,16 @@ function bindEvents() {
     saveState();
     showPage("calculator");
   });
+  $("calculateButton").addEventListener("click", handleCalculatePress);
   $("saveTestLog").addEventListener("click", saveTestLog);
   $("historyMetric").addEventListener("change", renderHistory);
   $("clearHistory").addEventListener("click", clearHistory);
   $("installAppButton").addEventListener("click", promptInstallApp);
+  $("safetyModalClose").addEventListener("click", closeSafetyModal);
+  $("safetyModalDone").addEventListener("click", closeSafetyModal);
+  $("safetyModalOverlay").addEventListener("click", (event) => {
+    if (event.target === $("safetyModalOverlay")) closeSafetyModal();
+  });
 
   $("menuToggle").addEventListener("click", openDrawer);
   $("drawerClose").addEventListener("click", closeDrawer);
@@ -1561,6 +1624,10 @@ function bindEvents() {
   }, { passive: true });
 
   document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !$("safetyModalOverlay").hidden) {
+      closeSafetyModal();
+      return;
+    }
     if (event.key === "Escape") closeDrawer();
   });
 
@@ -1586,7 +1653,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-my-pool", {
+    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-safety-calc", {
       updateViaCache: "none"
     }).catch(() => {});
   });

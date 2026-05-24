@@ -10,12 +10,12 @@
     <meta name="application-name" content="POOLZ">
     <meta name="description" content="POOLZ pool chemistry and dosing calculator.">
     <title>POOLZ</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260524-poolz-my-pool">
+    <link rel="manifest" href="manifest.webmanifest?v=20260524-poolz-safety-calc">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png">
     <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png">
-    <link rel="stylesheet" href="styles.css?v=20260524-poolz-my-pool">
-    <script defer src="app.js?v=20260524-poolz-my-pool"></script>
+    <link rel="stylesheet" href="styles.css?v=20260524-poolz-safety-calc">
+    <script defer src="app.js?v=20260524-poolz-safety-calc"></script>
   </head>
   <body>
     <header class="topbar">
@@ -186,6 +186,7 @@
             <div id="results" class="results-list"></div>
 
             <div class="results-actions">
+              <button id="calculateButton" class="primary-button" type="button">Calculate</button>
               <button id="saveTestLog" class="secondary-button" type="button">Save test log</button>
             </div>
 
@@ -446,29 +447,9 @@
                 <strong>Retest first</strong>
                 <span>Retest before redosing, especially after acid, chlorine or large corrections.</span>
               </article>
-            </div>
-
-            <div class="section-title compact-title">
-              <h2>Reference</h2>
-              <span>General reference</span>
-            </div>
-
-            <div class="notes-grid">
-              <article>
-                <strong>Core tests</strong>
-                <span>Free chlorine, total chlorine, combined chlorine, pH and temperature.</span>
-              </article>
-              <article>
-                <strong>Extra readings</strong>
-                <span>Alkalinity, calcium hardness, stabiliser if used, and salt for salt or mineral pools.</span>
-              </article>
               <article>
                 <strong>Indoor CYA</strong>
                 <span>Indoor pools often avoid cyanuric acid. Follow local rules and product labels.</span>
-              </article>
-              <article>
-                <strong>Hardness</strong>
-                <span>Victoria manages hardness as part of LSI water balance rather than a single standalone range.</span>
               </article>
             </div>
           </section>
@@ -503,6 +484,40 @@
           </section>
         </div>
       </section>
+
+      <div id="safetyModalOverlay" class="modal-overlay" hidden>
+        <section class="safety-modal" role="dialog" aria-modal="true" aria-labelledby="safetyModalTitle">
+          <div class="drawer-head">
+            <strong id="safetyModalTitle">Safety First</strong>
+            <button id="safetyModalClose" class="icon-close" type="button" aria-label="Close safety reminders"></button>
+          </div>
+
+          <div class="modal-safety-grid">
+            <article>
+              <strong>Do not mix chemicals</strong>
+              <span>Add products separately and keep them in their own containers.</span>
+            </article>
+            <article>
+              <strong>Acid into water</strong>
+              <span>Add acid carefully to pool water. Never add water into acid.</span>
+            </article>
+            <article>
+              <strong>Space additions</strong>
+              <span>Run the pump and allow mixing time before adding another chemical.</span>
+            </article>
+            <article>
+              <strong>Retest first</strong>
+              <span>Retest before redosing, especially after acid, chlorine or large corrections.</span>
+            </article>
+            <article>
+              <strong>Indoor CYA</strong>
+              <span>Indoor pools often avoid cyanuric acid. Follow local rules and product labels.</span>
+            </article>
+          </div>
+
+          <button id="safetyModalDone" class="primary-button" type="button">Show doses</button>
+        </section>
+      </div>
     </main>
   </body>
 </html>
