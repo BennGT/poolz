@@ -493,6 +493,7 @@ function applyPoolProfile(key = currentPoolKey()) {
   setValue("poolVolume", Math.round(volume));
   if ($("poolVolumeDisplay")) $("poolVolumeDisplay").textContent = formatPoolVolume(volume);
   setValue("profileName", settings.name || "My Pool");
+  if ($("activePoolName")) $("activePoolName").textContent = settings.name || "My Pool";
   const surface = normalizedSurface(settings.surface) || poolDefaults[defaultProfileKey].surface;
   setValue("surfaceType", surface);
   setRadio("sanitizer", settings.sanitizer || "chlorine");
@@ -1445,6 +1446,7 @@ function saveCurrentProfile() {
   renderProfileOptions(key);
   applyPoolProfile(key);
   saveState();
+  showPage("calculator");
 }
 
 function deleteCurrentProfile() {
@@ -1675,7 +1677,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-dismiss", {
+    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-save-pool", {
       updateViaCache: "none"
     }).catch(() => {});
   });
