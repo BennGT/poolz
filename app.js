@@ -258,15 +258,14 @@ function calculatedVolumeLitres() {
 function updateVolumeCalculator() {
   if (!$("volumeCalcResult")) return;
 
-  const unit = dimensionUnitLabel();
   const volume = calculatedVolumeLitres();
   const result = $("volumeCalcResult");
   const formula = $("volumeCalcFormula");
   const useButton = $("useCalculatedVolume");
 
   if (!volume) {
-    result.textContent = "Enter dimensions";
-    formula.textContent = `Measurements are in ${unit}.`;
+    result.textContent = "";
+    formula.textContent = "";
     useButton.disabled = true;
     return;
   }
@@ -1017,14 +1016,7 @@ function renderPendingResults(message) {
   const results = $("results");
   if (!results) return;
 
-  const article = document.createElement("article");
-  article.className = "empty-state";
-  const title = document.createElement("strong");
-  title.textContent = "Ready when you are";
-  const body = document.createElement("span");
-  body.textContent = message;
-  article.append(title, body);
-  results.replaceChildren(article);
+  results.replaceChildren();
   updateCalculateButton();
 }
 
@@ -1651,7 +1643,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260524-clean-calc", {
+    navigator.serviceWorker.register("service-worker.js?v=20260524-page-guides", {
       updateViaCache: "none"
     }).catch(() => {});
   });

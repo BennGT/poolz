@@ -10,12 +10,12 @@
     <meta name="application-name" content="POOLZ">
     <meta name="description" content="POOLZ pool chemistry and dosing calculator.">
     <title>POOLZ</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260524-clean-calc">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260524-clean-calc">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260524-clean-calc">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260524-clean-calc">
-    <link rel="stylesheet" href="styles.css?v=20260524-clean-calc">
-    <script defer src="app.js?v=20260524-clean-calc"></script>
+    <link rel="manifest" href="manifest.webmanifest?v=20260524-page-guides">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260524-page-guides">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260524-page-guides">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260524-page-guides">
+    <link rel="stylesheet" href="styles.css?v=20260524-page-guides">
+    <script defer src="app.js?v=20260524-page-guides"></script>
   </head>
   <body>
     <header class="topbar">
@@ -27,12 +27,8 @@
         </button>
 
         <div class="brand">
-          <img class="brand-logo" src="assets/poolz-logo.png?v=20260524-clean-calc" alt="POOLZ">
-          <div class="brand-copy">
-            <h1>POOLZ</h1>
-            <p>Works with any pool test strips, liquid test kits, or digital testing equipment.</p>
-            <p>Simply enter the measured readings from your test results to calculate chemical dosing.</p>
-          </div>
+          <img class="brand-logo" src="assets/poolz-logo.png?v=20260524-page-guides" alt="POOLZ">
+          <h1>POOLZ</h1>
         </div>
       </div>
 
@@ -61,7 +57,10 @@
         <div class="single-page">
           <section class="panel">
             <div class="section-title">
-              <h2>My Pool</h2>
+              <div>
+                <h2>My Pool</h2>
+                <span>Create and save pool profiles with the name, volume, surface, type, and units.</span>
+              </div>
             </div>
 
             <div class="form-grid setup-grid">
@@ -130,6 +129,11 @@
                   <h2>Test Results</h2>
                   <span id="activePoolName">My Pool</span>
                 </div>
+              </div>
+
+              <div class="page-guide calculator-guide">
+                <p>Works with any pool test strips, liquid test kits, or digital testing equipment.</p>
+                <p>Simply enter the measured readings from your test results to calculate chemical dosing.</p>
               </div>
 
               <div id="readingsGrid" class="form-grid readings-grid">
@@ -202,7 +206,10 @@
         <div class="single-page">
           <section class="panel">
             <div class="section-title">
-              <h2>Volume Calculator</h2>
+              <div>
+                <h2>Volume Calculator</h2>
+                <span>Input your pool or spa dimensions to estimate the water volume.</span>
+              </div>
             </div>
 
             <div class="form-grid volume-grid">
@@ -234,7 +241,7 @@
             </div>
 
             <div class="volume-result">
-              <strong id="volumeCalcResult">Enter dimensions</strong>
+              <strong id="volumeCalcResult"></strong>
               <span id="volumeCalcFormula"></span>
               <button id="useCalculatedVolume" class="primary-button" type="button" disabled>Use for selected pool</button>
             </div>
@@ -246,7 +253,10 @@
         <div class="single-page">
           <section class="panel">
             <div class="section-title">
-              <h2>Edit Targets</h2>
+              <div>
+                <h2>Edit Targets</h2>
+                <span>Set the chemistry targets POOLZ uses when calculating doses.</span>
+              </div>
               <div class="button-row">
                 <button id="saveTargets" class="primary-button" type="button">Save targets</button>
               </div>
@@ -301,7 +311,10 @@
         <div class="single-page">
           <section class="panel">
             <div class="section-title">
-              <h2>Edit Chemicals</h2>
+              <div>
+                <h2>Edit Chemicals</h2>
+                <span>Enter the product names and strengths you use so doses match your supplies.</span>
+              </div>
               <button id="saveChemicals" class="primary-button" type="button">Save chemicals</button>
             </div>
 
@@ -391,7 +404,7 @@
             <div class="section-title">
               <div>
                 <h2>History</h2>
-                <span id="historySummary">Saved test logs and chemical additions</span>
+                <span id="historySummary">Review saved test logs and trends from previous pool tests.</span>
               </div>
               <div class="button-row">
                 <select id="historyMetric" aria-label="Trend metric">
@@ -426,11 +439,17 @@
         <div class="single-page">
           <section class="panel">
             <div class="section-title">
-              <h2>Safety</h2>
-              <span>Quick reminders before dosing</span>
+              <div>
+                <h2>Safety</h2>
+                <span>Read key reminders before handling or adding pool chemicals.</span>
+              </div>
             </div>
 
             <div class="notes-grid safety-grid">
+              <article class="warning-note">
+                <strong>Indoor CYA</strong>
+                <span>Indoor pools often avoid cyanuric acid. Follow local rules and product labels.</span>
+              </article>
               <article>
                 <strong>Do not mix chemicals</strong>
                 <span>Add products separately and keep them in their own containers.</span>
@@ -447,10 +466,6 @@
                 <strong>Retest first</strong>
                 <span>Retest before redosing, especially after acid, chlorine or large corrections.</span>
               </article>
-              <article>
-                <strong>Indoor CYA</strong>
-                <span>Indoor pools often avoid cyanuric acid. Follow local rules and product labels.</span>
-              </article>
             </div>
           </section>
         </div>
@@ -462,7 +477,7 @@
             <div class="section-title">
               <div>
                 <h2>Install App</h2>
-                <span id="installStatus">Install prompt appears when your browser supports it</span>
+                <span id="installStatus">Install POOLZ on your phone or tablet for quick home screen access.</span>
               </div>
               <button id="installAppButton" class="primary-button" type="button" disabled>Install app</button>
             </div>

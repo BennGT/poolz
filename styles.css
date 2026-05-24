@@ -126,22 +126,6 @@ button {
   line-height: 1.2;
 }
 
-.brand-copy {
-  display: grid;
-  gap: 6px;
-  width: min(760px, 92vw);
-  justify-items: center;
-}
-
-.brand-copy p {
-  max-width: 680px;
-  margin: 0;
-  color: var(--teal-dark);
-  font-size: 1rem;
-  font-weight: 820;
-  line-height: 1.38;
-}
-
 .brand-logo {
   width: min(560px, 78vw);
   max-width: 560px;
@@ -326,6 +310,21 @@ button {
   margin: 0;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.page-guide {
+  display: grid;
+  gap: 6px;
+  max-width: 760px;
+  margin: -4px 0 16px;
+}
+
+.page-guide p {
+  margin: 0;
+  color: var(--teal-dark);
+  font-size: 0.98rem;
+  font-weight: 820;
+  line-height: 1.38;
 }
 
 .form-grid {
@@ -625,6 +624,19 @@ details summary strong {
 
 .install-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.safety-grid .warning-note {
+  border-color: rgba(185, 28, 28, 0.28);
+  background: #fff1f2;
+}
+
+.safety-grid .warning-note strong {
+  color: var(--red);
+}
+
+.safety-grid .warning-note span {
+  color: #7f1d1d;
 }
 
 .volume-grid {
@@ -931,16 +943,6 @@ details summary strong {
 
   .brand h1 {
     font-size: 1.05rem;
-  }
-
-  .brand-copy {
-    width: min(360px, 92vw);
-    gap: 5px;
-  }
-
-  .brand-copy p {
-    font-size: 0.92rem;
-    line-height: 1.34;
   }
 
   .layout {
