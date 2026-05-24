@@ -1152,6 +1152,23 @@ function handleCalculatePress() {
   openSafetyModal();
 }
 
+function playSplashSound() {
+  const audio = $("splashAudio");
+  const button = $("splashButton");
+  if (!audio) return;
+
+  audio.currentTime = 0;
+  audio.volume = 0.74;
+  audio.play().catch(() => {});
+
+  if (button) {
+    button.classList.remove("is-playing");
+    void button.offsetWidth;
+    button.classList.add("is-playing");
+    window.setTimeout(() => button.classList.remove("is-playing"), 820);
+  }
+}
+
 const readingLabels = {
   freeChlorine: "Free chlorine",
   totalChlorine: "Total chlorine",
@@ -1623,6 +1640,7 @@ function bindEvents() {
   $("historyMetric").addEventListener("change", renderHistory);
   $("clearHistory").addEventListener("click", clearHistory);
   $("installAppButton").addEventListener("click", promptInstallApp);
+  $("splashButton").addEventListener("click", playSplashSound);
   $("safetyModalClose").addEventListener("click", closeSafetyModal);
   $("safetyModalDone").addEventListener("click", closeSafetyModal);
   $("safetyModalOverlay").addEventListener("click", (event) => {
@@ -1677,7 +1695,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-save-pool", {
+    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-splash", {
       updateViaCache: "none"
     }).catch(() => {});
   });
