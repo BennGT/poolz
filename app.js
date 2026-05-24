@@ -1024,6 +1024,7 @@ function renderPendingResults(message) {
   body.textContent = message;
   article.append(title, body);
   results.replaceChildren(article);
+  updateCalculateButton();
 }
 
 function renderCards(cards) {
@@ -1094,11 +1095,27 @@ function renderCards(cards) {
 
     results.append(article);
   });
+  updateCalculateButton();
+}
+
+function updateCalculateButton() {
+  const button = $("calculateButton");
+  if (!button) return;
+
+  button.textContent = resultsVisible ? "Dismiss" : "Calculate";
+  button.classList.toggle("primary-button", !resultsVisible);
+  button.classList.toggle("secondary-button", resultsVisible);
 }
 
 function showDoseResults() {
   resultsVisible = true;
   renderCards(lastCards);
+  saveState();
+}
+
+function dismissDoseResults() {
+  resultsVisible = false;
+  renderPendingResults("Results dismissed. Press Calculate to review safety and dosing again.");
   saveState();
 }
 
@@ -1120,6 +1137,11 @@ function closeSafetyModal() {
 }
 
 function handleCalculatePress() {
+  if (resultsVisible) {
+    dismissDoseResults();
+    return;
+  }
+
   const cards = calculate({ showResults: false });
 
   if (!hasAnyReading() || !cards.length) {
@@ -1653,7 +1675,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-logo-22222", {
+    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-dismiss", {
       updateViaCache: "none"
     }).catch(() => {});
   });

@@ -1,5 +1,5 @@
-const CACHE_NAME = "poolz-dose-v7";
-const ASSET_VERSION = "20260524-poolz-logo-22222";
+const CACHE_NAME = "poolz-dose-v8";
+const ASSET_VERSION = "20260524-poolz-dismiss";
 const APP_SHELL = [
   "./",
   "./index.html",
