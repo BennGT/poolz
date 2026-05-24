@@ -337,8 +337,12 @@ button {
   row-gap: 16px;
 }
 
+.pool-profile-field {
+  grid-column: span 3;
+}
+
 .profile-name-field {
-  grid-column: span 4;
+  grid-column: span 3;
 }
 
 .pool-volume-field {
@@ -350,7 +354,7 @@ button {
 }
 
 .sanitizer-segment {
-  grid-column: span 4;
+  grid-column: span 6;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
@@ -362,6 +366,13 @@ button {
 .concentration-segment {
   grid-column: span 3;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.profile-actions {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .sanitizer-segment span,
@@ -884,6 +895,7 @@ details summary strong {
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 
+  .pool-profile-field,
   .profile-name-field,
   .sanitizer-segment {
     grid-column: span 6;
@@ -958,6 +970,7 @@ details summary strong {
       grid-template-columns: 1fr;
   }
 
+  .pool-profile-field,
   .profile-name-field,
   .pool-volume-field,
   .surface-field,
@@ -1009,6 +1022,10 @@ details summary strong {
   }
 
   .results-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-actions {
     grid-template-columns: 1fr;
   }
 

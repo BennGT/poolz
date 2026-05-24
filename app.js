@@ -292,7 +292,7 @@ function useCalculatedVolume() {
   applyPoolProfile(key);
   saveState();
   calculate();
-  showPage("calculator");
+  showPage("pools");
 }
 
 function syncCombinedChlorine() {
@@ -1586,7 +1586,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-simple-profile", {
+    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-my-pool", {
       updateViaCache: "none"
     }).catch(() => {});
   });

@@ -10,12 +10,12 @@
     <meta name="application-name" content="POOLZ">
     <meta name="description" content="POOLZ pool chemistry and dosing calculator.">
     <title>POOLZ</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260524-poolz-simple-profile">
+    <link rel="manifest" href="manifest.webmanifest?v=20260524-poolz-my-pool">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png">
     <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png">
-    <link rel="stylesheet" href="styles.css?v=20260524-poolz-simple-profile">
-    <script defer src="app.js?v=20260524-poolz-simple-profile"></script>
+    <link rel="stylesheet" href="styles.css?v=20260524-poolz-my-pool">
+    <script defer src="app.js?v=20260524-poolz-my-pool"></script>
   </head>
   <body>
     <header class="topbar">
@@ -44,6 +44,7 @@
         <button id="drawerClose" class="icon-close" type="button" aria-label="Close menu"></button>
       </div>
       <button class="drawer-link is-active" type="button" data-nav-page="calculator">Calculator</button>
+      <button class="drawer-link" type="button" data-nav-page="pools">My Pool</button>
       <button class="drawer-link" type="button" data-nav-page="volume">Volume calculator</button>
       <button class="drawer-link" type="button" data-nav-page="targets">Edit targets</button>
       <button class="drawer-link" type="button" data-nav-page="chemicals">Edit chemicals</button>
@@ -53,57 +54,75 @@
     </nav>
 
     <main class="app-shell">
+      <input type="radio" name="testSet" value="full" checked hidden>
+
+      <section id="page-pools" class="app-page" data-page-panel="pools">
+        <div class="single-page">
+          <section class="panel">
+            <div class="section-title">
+              <h2>My Pool</h2>
+            </div>
+
+            <div class="form-grid setup-grid">
+              <label class="field pool-profile-field">
+                <span>Saved pool</span>
+                <select id="poolProfile">
+                  <option value="my-pool">My Pool</option>
+                </select>
+              </label>
+
+              <label class="field profile-name-field">
+                <span>Profile name</span>
+                <input id="profileName" type="text" value="My Pool" autocomplete="off">
+              </label>
+
+              <label class="field pool-volume-field">
+                <span>Pool volume</span>
+                <input id="poolVolume" type="number" min="1" step="1" inputmode="decimal" value="50000">
+              </label>
+
+              <label class="field surface-field">
+                <span>Surface</span>
+                <select id="surfaceType">
+                  <option value="concrete">Concrete</option>
+                  <option value="fibreglass">Fibreglass</option>
+                  <option value="vinyl">Vinyl</option>
+                </select>
+              </label>
+
+              <fieldset class="segmented sanitizer-segment" aria-label="Pool type">
+                <legend>Pool type</legend>
+                <label><input type="radio" name="sanitizer" value="chlorine" checked><span>Chlorine</span></label>
+                <label><input type="radio" name="sanitizer" value="salt"><span>Salt</span></label>
+                <label><input type="radio" name="sanitizer" value="mineral"><span>Mineral</span></label>
+                <label><input type="radio" name="sanitizer" value="bromine"><span>Bromine</span></label>
+              </fieldset>
+
+              <fieldset class="segmented unit-segment" aria-label="Pool volume units">
+                <legend>Units</legend>
+                <label><input type="radio" name="unitSystem" value="litres" checked><span>Litres</span></label>
+                <label><input type="radio" name="unitSystem" value="gallons"><span>Gallons</span></label>
+              </fieldset>
+
+              <fieldset class="segmented concentration-segment" aria-label="Test result units">
+                <legend>Test unit</legend>
+                <label><input type="radio" name="concentrationUnit" value="ppm" checked><span>ppm</span></label>
+                <label><input type="radio" name="concentrationUnit" value="mgL"><span>mg/L</span></label>
+              </fieldset>
+
+              <div class="profile-actions">
+                <button id="newProfile" class="secondary-button" type="button">New pool</button>
+                <button id="saveProfile" class="primary-button" type="button">Save pool</button>
+                <button id="deleteProfile" class="secondary-button" type="button">Delete pool</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
       <section id="page-calculator" class="app-page is-active" data-page-panel="calculator">
         <div class="layout">
           <section class="workbench" aria-label="Pool chemistry inputs">
-            <section class="panel">
-              <select id="poolProfile" hidden>
-                <option value="my-pool">My Pool</option>
-              </select>
-              <input type="radio" name="testSet" value="full" checked hidden>
-
-              <div class="form-grid setup-grid">
-                <label class="field profile-name-field">
-                  <span>Profile name</span>
-                  <input id="profileName" type="text" value="My Pool" autocomplete="off">
-                </label>
-
-                <label class="field pool-volume-field">
-                  <span>Pool volume</span>
-                  <input id="poolVolume" type="number" min="1" step="1" inputmode="decimal" value="50000">
-                </label>
-
-                <label class="field surface-field">
-                  <span>Surface</span>
-                  <select id="surfaceType">
-                    <option value="concrete">Concrete</option>
-                    <option value="fibreglass">Fibreglass</option>
-                    <option value="vinyl">Vinyl</option>
-                  </select>
-                </label>
-
-                <fieldset class="segmented sanitizer-segment" aria-label="Pool type">
-                  <legend>Pool type</legend>
-                  <label><input type="radio" name="sanitizer" value="chlorine" checked><span>Chlorine</span></label>
-                  <label><input type="radio" name="sanitizer" value="salt"><span>Salt</span></label>
-                  <label><input type="radio" name="sanitizer" value="mineral"><span>Mineral</span></label>
-                  <label><input type="radio" name="sanitizer" value="bromine"><span>Bromine</span></label>
-                </fieldset>
-
-                <fieldset class="segmented unit-segment" aria-label="Pool volume units">
-                  <legend>Units</legend>
-                  <label><input type="radio" name="unitSystem" value="litres" checked><span>Litres</span></label>
-                  <label><input type="radio" name="unitSystem" value="gallons"><span>Gallons</span></label>
-                </fieldset>
-
-                <fieldset class="segmented concentration-segment" aria-label="Test result units">
-                  <legend>Test unit</legend>
-                  <label><input type="radio" name="concentrationUnit" value="ppm" checked><span>ppm</span></label>
-                  <label><input type="radio" name="concentrationUnit" value="mgL"><span>mg/L</span></label>
-                </fieldset>
-              </div>
-            </section>
-
             <section class="panel">
               <div class="section-title">
                 <h2>Test Results</h2>
