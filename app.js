@@ -1653,7 +1653,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-safety-calc", {
+    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-logo-22222", {
       updateViaCache: "none"
     }).catch(() => {});
   });

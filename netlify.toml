@@ -31,3 +31,8 @@
   for = "/service-worker.js"
   [headers.values]
     Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "no-cache"

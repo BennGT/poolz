@@ -1,16 +1,16 @@
-const CACHE_NAME = "poolz-dose-v6";
-const ASSET_VERSION = "20260524-poolz-safety-calc";
+const CACHE_NAME = "poolz-dose-v7";
+const ASSET_VERSION = "20260524-poolz-logo-22222";
 const APP_SHELL = [
   "./",
   "./index.html",
   `./styles.css?v=${ASSET_VERSION}`,
   `./app.js?v=${ASSET_VERSION}`,
   `./manifest.webmanifest?v=${ASSET_VERSION}`,
-  "./assets/poolz-logo.png",
-  "./assets/app-icon-32.png",
-  "./assets/app-icon-180.png",
-  "./assets/app-icon-192.png",
-  "./assets/app-icon-512.png"
+  `./assets/poolz-logo.png?v=${ASSET_VERSION}`,
+  `./assets/app-icon-32.png?v=${ASSET_VERSION}`,
+  `./assets/app-icon-180.png?v=${ASSET_VERSION}`,
+  `./assets/app-icon-192.png?v=${ASSET_VERSION}`,
+  `./assets/app-icon-512.png?v=${ASSET_VERSION}`
 ];
 
 self.addEventListener("install", (event) => {
