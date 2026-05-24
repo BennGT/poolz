@@ -45,6 +45,10 @@ body:has(.app-drawer.is-open) {
   overflow: hidden;
 }
 
+.mobile-splash {
+  display: none;
+}
+
 button,
 input,
 select,
@@ -360,6 +364,11 @@ button {
   grid-column: span 2;
 }
 
+.vessel-segment {
+  grid-column: span 2;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .sanitizer-segment {
   grid-column: span 6;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -383,6 +392,7 @@ button {
 }
 
 .sanitizer-segment span,
+.vessel-segment span,
 .unit-segment span,
 .concentration-segment span,
 .dimension-unit-segment span {
@@ -912,6 +922,81 @@ details summary strong {
 }
 
 @media (max-width: 760px) {
+  .mobile-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    padding: 28px 20px;
+    background:
+      radial-gradient(130% 54% at 50% -14%, rgba(255, 255, 255, 0.95) 0 35%, rgba(255, 255, 255, 0) 36%),
+      radial-gradient(115% 52% at 50% 8%, rgba(53, 204, 255, 0.48) 0 44%, rgba(53, 204, 255, 0) 45%),
+      linear-gradient(180deg, #f8fdff 0%, #d9f7ff 48%, #03a9e6 100%);
+    opacity: 1;
+    transition: opacity 420ms ease, visibility 420ms ease;
+  }
+
+  .mobile-splash::before,
+  .mobile-splash::after {
+    content: "";
+    position: absolute;
+    left: -18%;
+    width: 136%;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .mobile-splash::before {
+    bottom: -12%;
+    height: 38%;
+    background: rgba(0, 58, 120, 0.92);
+    transform: rotate(-4deg);
+  }
+
+  .mobile-splash::after {
+    bottom: 8%;
+    height: 18%;
+    background: rgba(255, 255, 255, 0.86);
+    transform: rotate(4deg);
+  }
+
+  .mobile-splash.is-hidden {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .mobile-splash-content {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    width: min(420px, 92vw);
+    text-align: center;
+  }
+
+  .mobile-splash-content img {
+    width: min(390px, 88vw);
+    height: auto;
+    filter: drop-shadow(0 22px 34px rgba(0, 47, 104, 0.26));
+  }
+
+  .mobile-splash-content div {
+    display: grid;
+    gap: 7px;
+  }
+
+  .mobile-splash-content p {
+    margin: 0;
+    color: var(--teal-dark);
+    font-size: 1rem;
+    font-weight: 850;
+    line-height: 1.34;
+  }
+
   .topbar {
     align-items: center;
     flex-direction: row;
@@ -983,11 +1068,13 @@ details summary strong {
 
   .unit-segment,
   .concentration-segment,
+  .vessel-segment,
   .dimension-unit-segment {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .sanitizer-segment span,
+  .vessel-segment span,
   .unit-segment span,
   .concentration-segment span,
   .dimension-unit-segment span {

@@ -5,6 +5,7 @@ const poolDefaults = {
   [defaultProfileKey]: {
     name: "My Pool",
     volume: 50000,
+    vesselType: "pool",
     sanitizer: "chlorine",
     surface: "fibreglass",
     allowCya: true
@@ -82,6 +83,7 @@ function makeDefaultProfileSettings() {
       key,
       {
         name: profile.name,
+        vesselType: profile.vesselType || "pool",
         sanitizer: profile.sanitizer,
         surface: profile.surface,
         volume: profile.volume,
@@ -479,6 +481,7 @@ function savePoolSettings(key = currentPoolKey()) {
   profileSettings[key] = {
     ...existing,
     name,
+    vesselType: selected("vesselType"),
     sanitizer: selected("sanitizer"),
     surface,
     volume,
@@ -495,6 +498,7 @@ function applyPoolProfile(key = currentPoolKey()) {
   if ($("activePoolName")) $("activePoolName").textContent = settings.name || "My Pool";
   const surface = normalizedSurface(settings.surface) || poolDefaults[defaultProfileKey].surface;
   setValue("surfaceType", surface);
+  setRadio("vesselType", settings.vesselType || "pool");
   setRadio("sanitizer", settings.sanitizer || "chlorine");
   lastPoolKey = key;
   updateVisibility();
@@ -1207,6 +1211,7 @@ function historyBaseEntry(kind) {
     poolName: currentPool().name,
     volumeLitres: poolVolumeLitres(),
     displayedVolume: formatPoolVolume(poolVolumeLitres()),
+    vesselType: selected("vesselType"),
     sanitizer: selected("sanitizer"),
     surface: normalizedSurface($("surfaceType").value)
   };
@@ -1404,6 +1409,7 @@ function newProfile() {
   profileSettings[key] = {
     name: "New Pool",
     volume: 50000,
+    vesselType: "pool",
     sanitizer: "chlorine",
     surface: "fibreglass",
     allowCya: true
@@ -1477,6 +1483,29 @@ async function promptInstallApp() {
   updateInstallState("Install prompt closed");
 }
 
+function startMobileSplash() {
+  const splash = $("mobileSplash");
+  if (!splash) return;
+
+  const isMobile = typeof window !== "undefined"
+    && window.matchMedia
+    && window.matchMedia("(max-width: 760px)").matches;
+
+  if (!isMobile) {
+    splash.remove();
+    return;
+  }
+
+  const hideSplash = () => {
+    splash.classList.add("is-hidden");
+    window.setTimeout(() => splash.remove(), 480);
+  };
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.setTimeout(hideSplash, reducedMotion ? 700 : 1800);
+  splash.addEventListener("click", hideSplash, { once: true });
+}
+
 function showPage(page) {
   all("[data-page-panel]").forEach((panel) => {
     panel.classList.toggle("is-active", panel.dataset.pagePanel === page);
@@ -1536,6 +1565,14 @@ function bindEvents() {
     savePoolSettings();
     saveState();
     calculate();
+  });
+
+  all('input[name="vesselType"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      savePoolSettings();
+      saveState();
+      calculate();
+    });
   });
 
   all('input[name="sanitizer"]').forEach((input) => {
@@ -1627,6 +1664,7 @@ bindEvents();
 loadState();
 loadHistory();
 updateInstallState();
+startMobileSplash();
 
 if (typeof window !== "undefined") {
   window.addEventListener("beforeinstallprompt", (event) => {
@@ -1643,7 +1681,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260524-page-guides", {
+    navigator.serviceWorker.register("service-worker.js?v=20260524-mobile-splash", {
       updateViaCache: "none"
     }).catch(() => {});
   });

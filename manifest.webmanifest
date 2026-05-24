@@ -10,13 +10,13 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "assets/app-icon-192.png?v=20260524-page-guides",
+      "src": "assets/app-icon-192.png?v=20260524-mobile-splash",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/app-icon-512.png?v=20260524-page-guides",
+      "src": "assets/app-icon-512.png?v=20260524-mobile-splash",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
