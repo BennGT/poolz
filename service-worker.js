@@ -1,5 +1,5 @@
-const CACHE_NAME = "poolz-dose-v11";
-const ASSET_VERSION = "20260524-poolz-splash";
+const CACHE_NAME = "poolz-dose-v12";
+const ASSET_VERSION = "20260524-poolz-no-splash";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -10,8 +10,7 @@ const APP_SHELL = [
   `./assets/app-icon-32.png?v=${ASSET_VERSION}`,
   `./assets/app-icon-180.png?v=${ASSET_VERSION}`,
   `./assets/app-icon-192.png?v=${ASSET_VERSION}`,
-  `./assets/app-icon-512.png?v=${ASSET_VERSION}`,
-  `./assets/pool-splash.wav?v=${ASSET_VERSION}`
+  `./assets/app-icon-512.png?v=${ASSET_VERSION}`
 ];
 
 self.addEventListener("install", (event) => {
