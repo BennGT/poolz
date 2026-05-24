@@ -641,7 +641,7 @@ function calculate({ showResults = false } = {}) {
     renderCards(cards);
   } else {
     resultsVisible = false;
-    renderPendingResults("Readings updated. Press Calculate to review safety and dosing.");
+    renderPendingResults("Readings updated. Press Calculate to show dosing.");
   }
   saveState();
   return cards;
@@ -1116,25 +1116,8 @@ function showDoseResults() {
 
 function dismissDoseResults() {
   resultsVisible = false;
-  renderPendingResults("Results dismissed. Press Calculate to review safety and dosing again.");
+  renderPendingResults("Results dismissed. Press Calculate to show dosing again.");
   saveState();
-}
-
-function openSafetyModal() {
-  const overlay = $("safetyModalOverlay");
-  if (!overlay) {
-    showDoseResults();
-    return;
-  }
-
-  overlay.hidden = false;
-  $("safetyModalDone").focus();
-}
-
-function closeSafetyModal() {
-  const overlay = $("safetyModalOverlay");
-  if (overlay) overlay.hidden = true;
-  showDoseResults();
 }
 
 function handleCalculatePress() {
@@ -1149,7 +1132,7 @@ function handleCalculatePress() {
     return;
   }
 
-  openSafetyModal();
+  showDoseResults();
 }
 
 const readingLabels = {
@@ -1623,11 +1606,6 @@ function bindEvents() {
   $("historyMetric").addEventListener("change", renderHistory);
   $("clearHistory").addEventListener("click", clearHistory);
   $("installAppButton").addEventListener("click", promptInstallApp);
-  $("safetyModalClose").addEventListener("click", closeSafetyModal);
-  $("safetyModalDone").addEventListener("click", closeSafetyModal);
-  $("safetyModalOverlay").addEventListener("click", (event) => {
-    if (event.target === $("safetyModalOverlay")) closeSafetyModal();
-  });
 
   $("menuToggle").addEventListener("click", openDrawer);
   $("drawerClose").addEventListener("click", closeDrawer);
@@ -1648,10 +1626,6 @@ function bindEvents() {
   }, { passive: true });
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !$("safetyModalOverlay").hidden) {
-      closeSafetyModal();
-      return;
-    }
     if (event.key === "Escape") closeDrawer();
   });
 
@@ -1677,7 +1651,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260524-poolz-no-splash", {
+    navigator.serviceWorker.register("service-worker.js?v=20260524-clean-calc", {
       updateViaCache: "none"
     }).catch(() => {});
   });

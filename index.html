@@ -10,12 +10,12 @@
     <meta name="application-name" content="POOLZ">
     <meta name="description" content="POOLZ pool chemistry and dosing calculator.">
     <title>POOLZ</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260524-poolz-no-splash">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260524-poolz-no-splash">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260524-poolz-no-splash">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260524-poolz-no-splash">
-    <link rel="stylesheet" href="styles.css?v=20260524-poolz-no-splash">
-    <script defer src="app.js?v=20260524-poolz-no-splash"></script>
+    <link rel="manifest" href="manifest.webmanifest?v=20260524-clean-calc">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260524-clean-calc">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260524-clean-calc">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260524-clean-calc">
+    <link rel="stylesheet" href="styles.css?v=20260524-clean-calc">
+    <script defer src="app.js?v=20260524-clean-calc"></script>
   </head>
   <body>
     <header class="topbar">
@@ -27,7 +27,7 @@
         </button>
 
         <div class="brand">
-          <img class="brand-logo" src="assets/poolz-logo.png?v=20260524-poolz-no-splash" alt="POOLZ">
+          <img class="brand-logo" src="assets/poolz-logo.png?v=20260524-clean-calc" alt="POOLZ">
           <div class="brand-copy">
             <h1>POOLZ</h1>
             <p>Works with any pool test strips, liquid test kits, or digital testing equipment.</p>
@@ -194,10 +194,6 @@
               <button id="saveTestLog" class="secondary-button" type="button">Save test log</button>
             </div>
 
-            <div class="safety-strip" aria-label="Safety reminders">
-              <strong>Safety</strong>
-              <span>Space chemical additions, keep the pump running, and retest before redosing.</span>
-            </div>
           </aside>
         </div>
       </section>
@@ -488,40 +484,6 @@
           </section>
         </div>
       </section>
-
-      <div id="safetyModalOverlay" class="modal-overlay" hidden>
-        <section class="safety-modal" role="dialog" aria-modal="true" aria-labelledby="safetyModalTitle">
-          <div class="drawer-head">
-            <strong id="safetyModalTitle">Safety First</strong>
-            <button id="safetyModalClose" class="icon-close" type="button" aria-label="Close safety reminders"></button>
-          </div>
-
-          <div class="modal-safety-grid">
-            <article>
-              <strong>Do not mix chemicals</strong>
-              <span>Add products separately and keep them in their own containers.</span>
-            </article>
-            <article>
-              <strong>Acid into water</strong>
-              <span>Add acid carefully to pool water. Never add water into acid.</span>
-            </article>
-            <article>
-              <strong>Space additions</strong>
-              <span>Run the pump and allow mixing time before adding another chemical.</span>
-            </article>
-            <article>
-              <strong>Retest first</strong>
-              <span>Retest before redosing, especially after acid, chlorine or large corrections.</span>
-            </article>
-            <article>
-              <strong>Indoor CYA</strong>
-              <span>Indoor pools often avoid cyanuric acid. Follow local rules and product labels.</span>
-            </article>
-          </div>
-
-          <button id="safetyModalDone" class="primary-button" type="button">Show doses</button>
-        </section>
-      </div>
     </main>
   </body>
 </html>
