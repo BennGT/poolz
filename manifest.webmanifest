@@ -1,25 +1,525 @@
-{
-  "name": "POOLZ",
-  "short_name": "POOLZ",
-  "description": "Pool chemistry and dosing calculator.",
-  "start_url": "./index.html",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#f2f5f4",
-  "theme_color": "#087ca5",
-  "orientation": "portrait-primary",
-  "icons": [
-    {
-      "src": "assets/app-icon-192.png?v=20260606-mobile-history",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "assets/app-icon-512.png?v=20260606-mobile-history",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
-}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#003a78">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="POOLZ">
+    <meta name="application-name" content="POOLZ">
+    <meta name="description" content="POOLZ pool chemistry and dosing calculator.">
+    <title>POOLZ</title>
+    <link rel="manifest" href="manifest.webmanifest?v=20260606-theme-polish">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260606-theme-polish">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260606-theme-polish">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260606-theme-polish">
+    <link rel="stylesheet" href="styles.css?v=20260606-theme-polish">
+    <script defer src="app.js?v=20260606-theme-polish"></script>
+  </head>
+  <body>
+    <div id="mobileSplash" class="mobile-splash" aria-hidden="true">
+      <div class="mobile-splash-content">
+        <img src="assets/poolz-logo.png?v=20260606-theme-polish" alt="">
+        <div>
+          <p>Use any pool testing method. Enter your readings and get instant chemical dosing recommendations.</p>
+        </div>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <div class="brand-row">
+        <button id="menuToggle" class="icon-button" type="button" aria-label="Open menu" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div class="brand">
+          <img class="brand-logo" src="assets/poolz-logo.png?v=20260606-theme-polish" alt="POOLZ">
+          <h1>POOLZ</h1>
+        </div>
+      </div>
+
+    </header>
+
+    <div id="drawerOverlay" class="drawer-overlay" hidden></div>
+    <nav id="appDrawer" class="app-drawer" aria-label="Main menu" aria-hidden="true">
+      <div class="drawer-head">
+        <strong>Menu</strong>
+        <button id="drawerClose" class="icon-close" type="button" aria-label="Close menu"></button>
+      </div>
+      <button class="drawer-link is-active" type="button" data-nav-page="calculator">Chemical calculator</button>
+      <button class="drawer-link" type="button" data-nav-page="pools">My Pool</button>
+      <button class="drawer-link" type="button" data-nav-page="volume">Volume calculator</button>
+      <button class="drawer-link" type="button" data-nav-page="targets">Edit targets</button>
+      <button class="drawer-link" type="button" data-nav-page="chemicals">Edit chemicals</button>
+      <button class="drawer-link" type="button" data-nav-page="history">History</button>
+      <button class="drawer-link" type="button" data-nav-page="safety">Safety</button>
+      <button class="drawer-link" type="button" data-nav-page="install">Install app</button>
+    </nav>
+
+    <main class="app-shell">
+      <input type="radio" name="testSet" value="full" checked hidden>
+
+      <section id="page-pools" class="app-page" data-page-panel="pools">
+        <div class="single-page">
+          <section class="panel">
+            <div class="section-title">
+              <div>
+                <h2>My Pool</h2>
+                <span>Create and save pool profiles with the name, volume, surface, type, and units.</span>
+              </div>
+            </div>
+
+            <div class="form-grid setup-grid">
+              <label class="field pool-profile-field">
+                <span>Saved pool</span>
+                <select id="poolProfile">
+                  <option value="my-pool">My Pool</option>
+                </select>
+              </label>
+
+              <label class="field profile-name-field">
+                <span>Profile name</span>
+                <input id="profileName" type="text" value="My Pool" autocomplete="off">
+              </label>
+
+              <label class="field pool-volume-field">
+                <span>Pool volume</span>
+                <input id="poolVolume" type="number" min="1" step="1" inputmode="decimal" value="50000" placeholder="eg: 50,000 L">
+                <small id="poolVolumeHint">eg: 50,000 L. Not sure your pool size? Use the volume calculator below.</small>
+              </label>
+
+              <div class="volume-link-field">
+                <button class="secondary-button" type="button" data-nav-page="volume">Use volume calculator</button>
+              </div>
+
+              <label class="field surface-field">
+                <span>Surface</span>
+                <select id="surfaceType">
+                  <option value="concrete">Concrete</option>
+                  <option value="fibreglass">Fibreglass</option>
+                  <option value="vinyl">Vinyl</option>
+                </select>
+              </label>
+
+              <fieldset class="segmented vessel-segment" aria-label="Pool or spa">
+                <legend>Water type</legend>
+                <label><input type="radio" name="vesselType" value="pool" checked><span>Pool</span></label>
+                <label><input type="radio" name="vesselType" value="spa"><span>Spa</span></label>
+              </fieldset>
+
+              <fieldset class="segmented sanitizer-segment" aria-label="Pool type">
+                <legend>Pool type</legend>
+                <label><input type="radio" name="sanitizer" value="chlorine" checked><span>Chlorine</span></label>
+                <label><input type="radio" name="sanitizer" value="salt"><span>Salt</span></label>
+                <label><input type="radio" name="sanitizer" value="mineral"><span>Mineral</span></label>
+                <label><input type="radio" name="sanitizer" value="bromine"><span>Bromine</span></label>
+              </fieldset>
+
+              <fieldset class="segmented unit-segment" aria-label="Pool volume units">
+                <legend>Units</legend>
+                <label><input type="radio" name="unitSystem" value="litres" checked><span>Litres</span></label>
+                <label><input type="radio" name="unitSystem" value="gallons"><span>Gallons</span></label>
+              </fieldset>
+
+              <fieldset class="segmented concentration-segment" aria-label="Test result units">
+                <legend>Test unit</legend>
+                <label><input type="radio" name="concentrationUnit" value="ppm" checked><span>ppm</span></label>
+                <label><input type="radio" name="concentrationUnit" value="mgL"><span>mg/L</span></label>
+              </fieldset>
+
+              <div class="profile-actions">
+                <button id="newProfile" class="secondary-button" type="button">New pool</button>
+                <button id="saveProfile" class="primary-button" type="button">Save pool</button>
+                <button id="deleteProfile" class="secondary-button" type="button">Delete pool</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="page-calculator" class="app-page is-active" data-page-panel="calculator">
+        <div class="layout">
+          <section class="workbench" aria-label="Pool chemistry inputs">
+            <section class="panel">
+              <div class="page-guide calculator-guide">
+                <p>Use any pool testing method. Enter your readings and get instant chemical dosing recommendations.</p>
+              </div>
+
+              <div class="section-title test-results-title">
+                <div>
+                  <h2>Test Results</h2>
+                  <span id="activePoolName">My Pool</span>
+                </div>
+              </div>
+
+              <div id="readingsGrid" class="form-grid readings-grid">
+                <label class="field chlorine-field">
+                  <span>Free chlorine</span>
+                  <input id="freeChlorine" type="number" min="0" step="0.1" inputmode="decimal">
+                </label>
+
+                <label class="field chlorine-field">
+                  <span>Total chlorine</span>
+                  <input id="totalChlorine" type="number" min="0" step="0.1" inputmode="decimal">
+                </label>
+
+                <label class="field chlorine-field">
+                  <span>Combined chlorine</span>
+                  <input id="combinedChlorine" type="number" min="0" step="0.01" inputmode="decimal" readonly>
+                </label>
+
+                <label class="field bromine-field is-hidden">
+                  <span>Total bromine</span>
+                  <input id="bromine" type="number" min="0" step="0.1" inputmode="decimal">
+                </label>
+
+                <label class="field">
+                  <span>pH</span>
+                  <input id="ph" type="number" min="0" max="14" step="0.1" inputmode="decimal">
+                </label>
+
+                <label class="field full-test">
+                  <span>Total alkalinity</span>
+                  <input id="alkalinity" type="number" min="0" step="1" inputmode="decimal">
+                </label>
+
+                <label class="field full-test">
+                  <span>Calcium hardness</span>
+                  <input id="calcium" type="number" min="0" step="1" inputmode="decimal">
+                </label>
+
+                <label class="field full-test cya-field">
+                  <span>Stabiliser / CYA</span>
+                  <input id="cya" type="number" min="0" step="1" inputmode="decimal">
+                </label>
+
+                <label class="field full-test salt-field">
+                  <span>Salt</span>
+                  <input id="salt" type="number" min="0" step="10" inputmode="decimal">
+                </label>
+
+                <label class="field">
+                  <span>Temperature</span>
+                  <input id="waterTemperature" type="number" min="0" max="60" step="0.1" inputmode="decimal">
+                </label>
+              </div>
+            </section>
+          </section>
+
+          <aside class="results-panel" aria-label="Dose results">
+            <div id="results" class="results-list"></div>
+
+            <div class="results-actions">
+              <button id="calculateButton" class="primary-button" type="button">Calculate</button>
+              <button id="saveTestLog" class="secondary-button" type="button">Save test log</button>
+            </div>
+
+          </aside>
+        </div>
+      </section>
+
+      <section id="page-volume" class="app-page" data-page-panel="volume">
+        <div class="single-page">
+          <section class="panel">
+            <div class="section-title">
+              <div>
+                <h2>Volume Calculator</h2>
+                <span>Input your pool or spa dimensions to estimate the water volume.</span>
+              </div>
+            </div>
+
+            <div class="form-grid volume-grid">
+              <fieldset class="segmented dimension-unit-segment" aria-label="Measurement units">
+                <legend>Measurements</legend>
+                <label><input type="radio" name="dimensionUnit" value="metres" checked><span>Metres</span></label>
+                <label><input type="radio" name="dimensionUnit" value="feet"><span>Feet</span></label>
+              </fieldset>
+
+              <label class="field">
+                <span>Length</span>
+                <input id="volumeLength" type="number" min="0" step="0.01" inputmode="decimal">
+              </label>
+
+              <label class="field">
+                <span>Width</span>
+                <input id="volumeWidth" type="number" min="0" step="0.01" inputmode="decimal">
+              </label>
+
+              <label class="field">
+                <span>Shallow depth</span>
+                <input id="volumeShallowDepth" type="number" min="0" step="0.01" inputmode="decimal">
+              </label>
+
+              <label class="field">
+                <span>Deep depth</span>
+                <input id="volumeDeepDepth" type="number" min="0" step="0.01" inputmode="decimal">
+              </label>
+            </div>
+
+            <div class="volume-result">
+              <strong id="volumeCalcResult"></strong>
+              <span id="volumeCalcFormula"></span>
+              <button id="useCalculatedVolume" class="primary-button" type="button" disabled>Use for selected pool</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="page-targets" class="app-page" data-page-panel="targets">
+        <div class="single-page">
+          <section class="panel">
+            <div class="section-title">
+              <div>
+                <h2>Edit Targets</h2>
+                <span>Set the chemistry targets POOLZ uses when calculating doses.</span>
+              </div>
+            </div>
+
+            <div class="form-grid targets-grid">
+              <label class="field target-chlorine">
+                <span>Free chlorine target</span>
+                <input id="targetChlorine" type="number" min="0" step="0.1" value="1.5">
+              </label>
+
+              <label class="field target-combined">
+                <span>Combined chlorine action</span>
+                <input id="targetCombined" type="number" min="0" step="0.1" value="1">
+              </label>
+
+              <label class="field target-bromine is-hidden">
+                <span>Bromine target</span>
+                <input id="targetBromine" type="number" min="0" step="0.1" value="4">
+              </label>
+
+              <label class="field">
+                <span>pH target</span>
+                <input id="targetPh" type="number" min="0" max="14" step="0.1" value="7.5">
+              </label>
+
+              <label class="field">
+                <span>Alkalinity target</span>
+                <input id="targetAlkalinity" type="number" min="0" step="1" value="100">
+              </label>
+
+              <label class="field">
+                <span>Hardness target</span>
+                <input id="targetCalcium" type="number" min="0" step="1" value="250">
+              </label>
+
+              <label class="field target-cya">
+                <span>Stabiliser target</span>
+                <input id="targetCya" type="number" min="0" step="1" value="30">
+              </label>
+
+              <label class="field target-salt">
+                <span>Salt target</span>
+                <input id="targetSalt" type="number" min="0" step="10" value="4000">
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button id="saveTargets" class="primary-button" type="button">Save targets</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="page-chemicals" class="app-page" data-page-panel="chemicals">
+        <div class="single-page">
+          <section class="panel">
+            <div class="section-title">
+              <div>
+                <h2>Edit Chemicals</h2>
+                <span>Enter the product names and strengths you use so doses match your supplies.</span>
+              </div>
+            </div>
+
+            <div class="form-grid chemicals-grid">
+              <label class="field">
+                <span>Liquid chlorine name</span>
+                <input id="liquidChlorineName" type="text" value="Liquid chlorine" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Liquid chlorine strength</span>
+                <input id="liquidChlorineStrength" type="number" min="1" max="20" step="0.1" value="12.5">
+              </label>
+
+              <label class="field">
+                <span>Granular chlorine name</span>
+                <input id="granularChlorineName" type="text" value="Granular chlorine" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Granular chlorine strength</span>
+                <input id="granularChlorineStrength" type="number" min="1" max="100" step="0.1" value="65">
+              </label>
+
+              <label class="field">
+                <span>Acid name</span>
+                <input id="acidName" type="text" value="Hydrochloric acid" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Acid strength</span>
+                <input id="muriaticStrength" type="number" min="1" max="40" step="0.1" value="31.45">
+              </label>
+
+              <label class="field">
+                <span>Dry acid name</span>
+                <input id="dryAcidName" type="text" value="Dry acid" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>pH up / buffer name</span>
+                <input id="phUpName" type="text" value="Sodium bicarbonate" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Bromine name</span>
+                <input id="bromineName" type="text" value="Bromine granules" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Bromine strength</span>
+                <input id="bromineStrength" type="number" min="1" max="100" step="0.1" value="61">
+              </label>
+
+              <label class="field">
+                <span>Hardness increaser name</span>
+                <input id="calciumName" type="text" value="Calcium chloride" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Hardness increaser strength</span>
+                <input id="calciumPurity" type="number" min="1" max="100" step="0.1" value="77">
+              </label>
+
+              <label class="field">
+                <span>Stabiliser name</span>
+                <input id="stabilizerName" type="text" value="Stabiliser" autocomplete="off">
+              </label>
+
+              <label class="field">
+                <span>Stabiliser strength</span>
+                <input id="stabilizerPurity" type="number" min="1" max="100" step="0.1" value="100">
+              </label>
+
+              <label class="field">
+                <span>Salt name</span>
+                <input id="saltName" type="text" value="Pool salt" autocomplete="off">
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button id="saveChemicals" class="primary-button" type="button">Save chemicals</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="page-history" class="app-page" data-page-panel="history">
+        <div class="single-page">
+          <section class="panel">
+            <div class="section-title">
+              <div>
+                <h2>History</h2>
+                <span id="historySummary">Review saved test logs and trends from previous pool tests.</span>
+              </div>
+              <div class="button-row">
+                <select id="historyMetric" aria-label="Trend metric">
+                  <option value="freeChlorine">Free chlorine</option>
+                  <option value="combinedChlorine">Combined chlorine</option>
+                  <option value="ph">pH</option>
+                  <option value="alkalinity">Alkalinity</option>
+                  <option value="calcium">Calcium hardness</option>
+                  <option value="cya">Stabiliser</option>
+                  <option value="salt">Salt</option>
+                  <option value="waterTemperature">Temperature</option>
+                </select>
+                <button id="exportHistory" class="secondary-button" type="button">Export Excel file</button>
+                <button id="shareHistory" class="secondary-button" type="button">Share / email</button>
+                <button id="clearHistory" class="secondary-button" type="button">Clear history</button>
+              </div>
+            </div>
+
+            <div id="historyChart" class="history-chart" aria-label="Trend chart">
+              <span>No saved tests yet</span>
+            </div>
+
+            <div id="historyLog" class="history-log">
+              <article class="empty-state">
+                <strong>No history yet</strong>
+                <span>Save a test log or chemical additions from the calculator.</span>
+              </article>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="page-safety" class="app-page" data-page-panel="safety">
+        <div class="single-page">
+          <section class="panel">
+            <div class="section-title">
+              <div>
+                <h2>Safety</h2>
+                <span>Read key reminders before handling or adding pool chemicals.</span>
+              </div>
+            </div>
+
+            <div class="notes-grid safety-grid">
+              <article class="warning-note">
+                <span>Indoor pools often avoid cyanuric acid. Follow local rules and product labels.</span>
+              </article>
+              <article>
+                <span>Add products separately and keep them in their own containers.</span>
+              </article>
+              <article>
+                <span>Add acid carefully to pool water. Never add water into acid.</span>
+              </article>
+              <article>
+                <span>Run the pump and allow mixing time before adding another chemical.</span>
+              </article>
+              <article>
+                <span>Retest before redosing, especially after acid, chlorine or large corrections.</span>
+              </article>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="page-install" class="app-page" data-page-panel="install">
+        <div class="single-page">
+          <section class="panel">
+            <div class="section-title">
+              <div>
+                <h2>Install App</h2>
+                <span id="installStatus">Install POOLZ on mobile now. App Store and Play Store releases are planned.</span>
+              </div>
+            </div>
+
+            <div class="install-platforms" aria-label="Mobile install options">
+              <button class="install-icon-button" type="button" data-install-platform="ios" aria-label="iPhone and iPad install instructions">
+                <span class="platform-logo platform-logo-ios" aria-hidden="true">iOS</span>
+              </button>
+              <button class="install-icon-button" type="button" data-install-platform="android" aria-label="Android install instructions">
+                <span class="platform-logo platform-logo-android" aria-hidden="true">
+                  <span class="android-head"></span>
+                  <span class="android-body"></span>
+                </span>
+              </button>
+            </div>
+
+            <section id="installGuide" class="install-guide" aria-live="polite">
+              <strong>Choose your mobile platform</strong>
+              <span>Tap an icon to show the install steps.</span>
+            </section>
+          </section>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
