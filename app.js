@@ -5,7 +5,6 @@ const poolDefaults = {
   [defaultProfileKey]: {
     name: "My Pool",
     volume: 50000,
-    vesselType: "pool",
     sanitizer: "chlorine",
     surface: "fibreglass",
     allowCya: true
@@ -123,7 +122,6 @@ function makeDefaultProfileSettings() {
       key,
       {
         name: profile.name,
-        vesselType: profile.vesselType || "pool",
         sanitizer: profile.sanitizer,
         surface: profile.surface,
         volume: profile.volume,
@@ -265,6 +263,12 @@ function concentrationUnitSuffix() {
   return ` ${concentrationUnitLabel()}`;
 }
 
+function syncConcentrationUnitControls() {
+  if (document.querySelector('input[name="targetConcentrationUnit"]')) {
+    setRadio("targetConcentrationUnit", selected("concentrationUnit"));
+  }
+}
+
 function litresToGallons(litres) {
   return litres / 3.785411784;
 }
@@ -278,9 +282,7 @@ function selectedVolumeUnitLabel() {
 }
 
 function selectedVolumeExample() {
-  return currentUnitSystem() === "gallons"
-    ? "eg: 13,200 gal. Not sure your pool size? Use the volume calculator below."
-    : "eg: 50,000 L. Not sure your pool size? Use the volume calculator below.";
+  return currentUnitSystem() === "gallons" ? "eg: 13,200 gal" : "eg: 50,000 L";
 }
 
 function litresToSelectedVolume(litres) {
@@ -295,7 +297,7 @@ function poolVolumeInputToLitres() {
 
 function updatePoolVolumeExample() {
   if ($("poolVolume")) $("poolVolume").placeholder = selectedVolumeExample();
-  if ($("poolVolumeHint")) $("poolVolumeHint").textContent = selectedVolumeExample();
+  if ($("poolVolumeHint")) $("poolVolumeHint").textContent = "Not sure your pool size? Use the volume calculator below.";
 }
 
 function formatPoolVolume(litres) {
@@ -590,7 +592,6 @@ function savePoolSettings(key = currentPoolKey()) {
   profileSettings[key] = {
     ...existing,
     name,
-    vesselType: selected("vesselType"),
     sanitizer: selected("sanitizer"),
     surface,
     volume,
@@ -609,7 +610,6 @@ function applyPoolProfile(key = currentPoolKey()) {
   if ($("activePoolName")) $("activePoolName").textContent = settings.name || "My Pool";
   const surface = normalizedSurface(settings.surface) || poolDefaults[defaultProfileKey].surface;
   setValue("surfaceType", surface);
-  setRadio("vesselType", settings.vesselType || "pool");
   setRadio("sanitizer", settings.sanitizer || "chlorine");
   setTargetInputs(settings.targets || currentDefaultTargets());
   lastPoolKey = key;
@@ -680,6 +680,7 @@ function loadState() {
     setRadio("testSet", "full");
     if (state.unitSystem) setRadio("unitSystem", state.unitSystem);
     if (state.concentrationUnit) setRadio("concentrationUnit", state.concentrationUnit);
+    syncConcentrationUnitControls();
     applyPoolProfile(currentPoolKey());
 
     Object.entries(state.values || {}).forEach(([id, value]) => {
@@ -1331,7 +1332,6 @@ function historyBaseEntry(kind) {
     poolName: currentPool().name,
     volumeLitres: poolVolumeLitres(),
     displayedVolume: formatPoolVolume(poolVolumeLitres()),
-    vesselType: selected("vesselType"),
     sanitizer: selected("sanitizer"),
     surface: normalizedSurface($("surfaceType").value)
   };
@@ -1554,7 +1554,6 @@ function historyCsvContent() {
     "Entry type",
     "Pool",
     "Volume",
-    "Water type",
     "Sanitiser",
     "Surface",
     "Free chlorine",
@@ -1592,7 +1591,6 @@ function historyCsvContent() {
       entry.kind === "test" ? "Test log" : "Chemical additions",
       entry.poolName,
       entry.displayedVolume,
-      entry.vesselType || "",
       entry.sanitizer || "",
       entry.surface || "",
       readingExportValue(entry, "freeChlorine"),
@@ -1681,7 +1679,6 @@ function newProfile() {
   profileSettings[key] = {
     name: "New Pool",
     volume: null,
-    vesselType: "pool",
     sanitizer: "chlorine",
     surface: "fibreglass",
     allowCya: true,
@@ -1881,14 +1878,6 @@ function bindEvents() {
     setTargetsFromProfile();
   });
 
-  all('input[name="vesselType"]').forEach((input) => {
-    input.addEventListener("change", () => {
-      savePoolSettings();
-      saveState();
-      calculate();
-    });
-  });
-
   all('input[name="sanitizer"]').forEach((input) => {
     input.addEventListener("change", () => {
       savePoolSettings();
@@ -1916,6 +1905,17 @@ function bindEvents() {
 
   all('input[name="concentrationUnit"]').forEach((input) => {
     input.addEventListener("change", () => {
+      syncConcentrationUnitControls();
+      saveState();
+      calculate();
+      renderHistory();
+    });
+  });
+
+  all('input[name="targetConcentrationUnit"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      setRadio("concentrationUnit", input.value);
+      syncConcentrationUnitControls();
       saveState();
       calculate();
       renderHistory();
@@ -2000,7 +2000,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260606-surface-targets", {
+    navigator.serviceWorker.register("service-worker.js?v=20260606-unit-layout", {
       updateViaCache: "none"
     }).catch(() => {});
   });

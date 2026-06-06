@@ -382,13 +382,13 @@ button {
   width: 100%;
 }
 
-.surface-field {
-  grid-column: span 2;
+.unit-segment {
+  grid-column: 9 / span 2;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.vessel-segment {
+.surface-field {
   grid-column: span 2;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .sanitizer-segment {
@@ -396,13 +396,7 @@ button {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.unit-segment {
-  grid-column: span 3;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
 .concentration-segment {
-  grid-column: span 3;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -414,7 +408,6 @@ button {
 }
 
 .sanitizer-segment span,
-.vessel-segment span,
 .unit-segment span,
 .concentration-segment span,
 .dimension-unit-segment span {
@@ -424,6 +417,12 @@ button {
 
 .readings-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.test-unit-segment,
+.target-unit-segment {
+  max-width: 260px;
+  margin-bottom: 16px;
 }
 
 .field {
@@ -1065,7 +1064,6 @@ details summary strong {
 
   .pool-profile-field,
   .profile-name-field,
-  .vessel-segment,
   .sanitizer-segment {
     grid-column: span 6;
   }
@@ -1073,8 +1071,7 @@ details summary strong {
   .pool-volume-field,
   .volume-link-field,
   .surface-field,
-  .unit-segment,
-  .concentration-segment {
+  .unit-segment {
     grid-column: span 6;
   }
 
@@ -1205,9 +1202,9 @@ details summary strong {
   .chemicals-grid,
   .readings-grid,
   .volume-grid,
-    .notes-grid,
-    .install-grid {
-      grid-template-columns: 1fr;
+  .notes-grid,
+  .install-grid {
+    grid-template-columns: 1fr;
   }
 
   .pool-profile-field,
@@ -1215,10 +1212,8 @@ details summary strong {
   .pool-volume-field,
   .volume-link-field,
   .surface-field,
-  .vessel-segment,
   .sanitizer-segment,
-  .unit-segment,
-  .concentration-segment {
+  .unit-segment {
     grid-column: 1 / -1;
   }
 
@@ -1232,13 +1227,11 @@ details summary strong {
 
   .unit-segment,
   .concentration-segment,
-  .vessel-segment,
   .dimension-unit-segment {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .sanitizer-segment span,
-  .vessel-segment span,
   .unit-segment span,
   .concentration-segment span,
   .dimension-unit-segment span {

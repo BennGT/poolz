@@ -10,17 +10,17 @@
     <meta name="application-name" content="POOLZ">
     <meta name="description" content="POOLZ pool chemistry and dosing calculator.">
     <title>POOLZ</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260606-surface-targets">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260606-surface-targets">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260606-surface-targets">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260606-surface-targets">
-    <link rel="stylesheet" href="styles.css?v=20260606-surface-targets">
-    <script defer src="app.js?v=20260606-surface-targets"></script>
+    <link rel="manifest" href="manifest.webmanifest?v=20260606-unit-layout">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260606-unit-layout">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260606-unit-layout">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260606-unit-layout">
+    <link rel="stylesheet" href="styles.css?v=20260606-unit-layout">
+    <script defer src="app.js?v=20260606-unit-layout"></script>
   </head>
   <body>
     <div id="mobileSplash" class="mobile-splash" aria-hidden="true">
       <div class="mobile-splash-content">
-        <img src="assets/poolz-logo.png?v=20260606-surface-targets" alt="">
+        <img src="assets/poolz-logo.png?v=20260606-unit-layout" alt="">
         <div>
           <p>Use any pool testing method. Enter your readings and get instant chemical dosing recommendations.</p>
         </div>
@@ -36,7 +36,7 @@
         </button>
 
         <div class="brand">
-          <img class="brand-logo" src="assets/poolz-logo.png?v=20260606-surface-targets" alt="POOLZ">
+          <img class="brand-logo" src="assets/poolz-logo.png?v=20260606-unit-layout" alt="POOLZ">
           <h1>POOLZ</h1>
         </div>
       </div>
@@ -68,7 +68,7 @@
             <div class="section-title">
               <div>
                 <h2>My Pool</h2>
-                <span>Create and save pool profiles with the name, volume, surface, type, and units.</span>
+                <span>Create and save pool profiles with the name, volume, surface, sanitiser, and units.</span>
               </div>
             </div>
 
@@ -88,12 +88,18 @@
               <label class="field pool-volume-field">
                 <span>Pool volume</span>
                 <input id="poolVolume" type="number" min="1" step="1" inputmode="decimal" value="50000" placeholder="eg: 50,000 L">
-                <small id="poolVolumeHint">eg: 50,000 L. Not sure your pool size? Use the volume calculator below.</small>
+                <small id="poolVolumeHint">Not sure your pool size? Use the volume calculator below.</small>
               </label>
 
               <div class="volume-link-field">
                 <button class="secondary-button" type="button" data-nav-page="volume">Use volume calculator</button>
               </div>
+
+              <fieldset class="segmented unit-segment" aria-label="Pool volume units">
+                <legend>Units</legend>
+                <label><input type="radio" name="unitSystem" value="litres" checked><span>Litres</span></label>
+                <label><input type="radio" name="unitSystem" value="gallons"><span>Gallons</span></label>
+              </fieldset>
 
               <label class="field surface-field">
                 <span>Surface</span>
@@ -104,30 +110,12 @@
                 </select>
               </label>
 
-              <fieldset class="segmented vessel-segment" aria-label="Pool or spa">
-                <legend>Water type</legend>
-                <label><input type="radio" name="vesselType" value="pool" checked><span>Pool</span></label>
-                <label><input type="radio" name="vesselType" value="spa"><span>Spa</span></label>
-              </fieldset>
-
               <fieldset class="segmented sanitizer-segment" aria-label="Pool type">
                 <legend>Pool type</legend>
                 <label><input type="radio" name="sanitizer" value="chlorine" checked><span>Chlorine</span></label>
                 <label><input type="radio" name="sanitizer" value="salt"><span>Salt</span></label>
                 <label><input type="radio" name="sanitizer" value="mineral"><span>Mineral</span></label>
                 <label><input type="radio" name="sanitizer" value="bromine"><span>Bromine</span></label>
-              </fieldset>
-
-              <fieldset class="segmented unit-segment" aria-label="Pool volume units">
-                <legend>Units</legend>
-                <label><input type="radio" name="unitSystem" value="litres" checked><span>Litres</span></label>
-                <label><input type="radio" name="unitSystem" value="gallons"><span>Gallons</span></label>
-              </fieldset>
-
-              <fieldset class="segmented concentration-segment" aria-label="Test result units">
-                <legend>Test unit</legend>
-                <label><input type="radio" name="concentrationUnit" value="ppm" checked><span>ppm</span></label>
-                <label><input type="radio" name="concentrationUnit" value="mgL"><span>mg/L</span></label>
               </fieldset>
 
               <div class="profile-actions">
@@ -154,6 +142,12 @@
                   <span id="activePoolName">My Pool</span>
                 </div>
               </div>
+
+              <fieldset class="segmented concentration-segment test-unit-segment" aria-label="Test result units">
+                <legend>Test unit</legend>
+                <label><input type="radio" name="concentrationUnit" value="ppm" checked><span>ppm</span></label>
+                <label><input type="radio" name="concentrationUnit" value="mgL"><span>mg/L</span></label>
+              </fieldset>
 
               <div id="readingsGrid" class="form-grid readings-grid">
                 <label class="field chlorine-field">
@@ -277,6 +271,12 @@
                 <span>Defaults follow the selected pool surface and can be edited for each pool.</span>
               </div>
             </div>
+
+            <fieldset class="segmented concentration-segment target-unit-segment" aria-label="Target units">
+              <legend>Target unit</legend>
+              <label><input type="radio" name="targetConcentrationUnit" value="ppm" checked><span>ppm</span></label>
+              <label><input type="radio" name="targetConcentrationUnit" value="mgL"><span>mg/L</span></label>
+            </fieldset>
 
             <div class="form-grid targets-grid">
               <label class="field target-chlorine">
