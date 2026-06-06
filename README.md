@@ -1,38 +1,25 @@
-[build]
-  publish = "."
+# POOLZ
 
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+A clean consumer version of the pool chemical dose calculator.
 
-[[headers]]
-  for = "/index.html"
-  [headers.values]
-    Cache-Control = "no-cache"
+This version is separate from the Rock N Water build in the parent folder. It is set up for personal pool owners to save pool setups on-device.
 
-[[headers]]
-  for = "/app.js"
-  [headers.values]
-    Cache-Control = "no-cache"
+## Current Features
 
-[[headers]]
-  for = "/styles.css"
-  [headers.values]
-    Cache-Control = "no-cache"
+- My Pool page for creating, switching, editing, and deleting saved pool profiles.
+- Pool types: chlorine, salt, mineral, and bromine.
+- Volume calculator using length, width, and average depth.
+- Test result display can switch between ppm and mg/L.
+- Flexible test entry with all core and extended readings available.
+- Calculate button flow with safety reminders shown before dosing results.
+- Editable targets, custom chemical names, and chemical strengths.
+- Local test history with trend charts.
+- Installable web app shell with manifest and service worker.
 
-[[headers]]
-  for = "/manifest.webmanifest"
-  [headers.values]
-    Cache-Control = "no-cache"
+## Logo
 
-[[headers]]
-  for = "/service-worker.js"
-  [headers.values]
-    Cache-Control = "no-cache"
+The current POOLZ build uses the supplied POOLZ logo, generated app icons from that artwork, and a blue wave visual theme.
 
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "no-cache"
+## Store Launch Note
+
+For Play Store and iOS App Store release, this web app can later be wrapped with Capacitor or another native shell. The app store build should use final POOLZ icons, splash screens, app IDs, privacy text, and store metadata.
