@@ -64,7 +64,47 @@ const readingIds = [
   "waterTemperature"
 ];
 
-const savedValueIds = valueIds.filter((id) => !readingIds.includes(id));
+const targetIds = [
+  "targetChlorine",
+  "targetCombined",
+  "targetBromine",
+  "targetPh",
+  "targetAlkalinity",
+  "targetCalcium",
+  "targetCya",
+  "targetSalt"
+];
+
+const targetFieldMap = {
+  targetChlorine: "chlorine",
+  targetCombined: "combined",
+  targetBromine: "bromine",
+  targetPh: "ph",
+  targetAlkalinity: "alkalinity",
+  targetCalcium: "calcium",
+  targetCya: "cya",
+  targetSalt: "salt"
+};
+
+const surfaceTargetDefaults = {
+  concrete: {
+    ph: 7.5,
+    alkalinity: 100,
+    calcium: 300
+  },
+  fibreglass: {
+    ph: 7.4,
+    alkalinity: 90,
+    calcium: 200
+  },
+  vinyl: {
+    ph: 7.4,
+    alkalinity: 90,
+    calcium: 175
+  }
+};
+
+const savedValueIds = valueIds.filter((id) => !readingIds.includes(id) && !targetIds.includes(id));
 
 let profileSettings = makeDefaultProfileSettings();
 let lastPoolKey = defaultProfileKey;
@@ -87,7 +127,8 @@ function makeDefaultProfileSettings() {
         sanitizer: profile.sanitizer,
         surface: profile.surface,
         volume: profile.volume,
-        allowCya: profile.allowCya
+        allowCya: profile.allowCya,
+        targets: defaultTargetsFor(profile.surface, profile.sanitizer, profile.allowCya)
       }
     ])
   );
@@ -470,18 +511,17 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-function currentDefaultTargets() {
-  const sanitizer = selected("sanitizer");
-  const cyaAllowed = activePoolAllowsCya();
+function defaultTargetsFor(surface, sanitizer, cyaAllowed) {
+  const surfaceDefaults = surfaceTargetDefaults[normalizedSurface(surface)] || surfaceTargetDefaults.fibreglass;
 
   if (sanitizer === "bromine") {
     return {
       chlorine: 1.5,
       combined: 1,
       bromine: 4,
-      ph: 7.6,
-      alkalinity: 100,
-      calcium: 250,
+      ph: Math.max(surfaceDefaults.ph, 7.6),
+      alkalinity: surfaceDefaults.alkalinity,
+      calcium: surfaceDefaults.calcium,
       cya: 0,
       salt: 0
     };
@@ -491,24 +531,52 @@ function currentDefaultTargets() {
     chlorine: sanitizer === "salt" || sanitizer === "mineral" || cyaAllowed ? 2 : 1.5,
     combined: 1,
     bromine: 4,
-    ph: 7.5,
-    alkalinity: 100,
-    calcium: 250,
+    ph: surfaceDefaults.ph,
+    alkalinity: surfaceDefaults.alkalinity,
+    calcium: surfaceDefaults.calcium,
     cya: cyaAllowed ? 30 : 0,
     salt: sanitizer === "salt" || sanitizer === "mineral" ? 4000 : 0
   };
 }
 
+function currentDefaultTargets() {
+  const sanitizer = selected("sanitizer");
+  const surface = normalizedSurface($("surfaceType").value);
+  return defaultTargetsFor(surface, sanitizer, activePoolAllowsCya());
+}
+
+function targetsFromInputs() {
+  const defaults = currentDefaultTargets();
+  return Object.fromEntries(
+    Object.entries(targetFieldMap).map(([inputId, key]) => {
+      const value = numberValue(inputId);
+      return [key, value === null ? defaults[key] : value];
+    })
+  );
+}
+
+function normalizeTargets(targets) {
+  const defaults = currentDefaultTargets();
+  return {
+    ...defaults,
+    ...(targets || {})
+  };
+}
+
+function setTargetInputs(targets) {
+  const values = normalizeTargets(targets);
+  setValue("targetChlorine", values.chlorine);
+  setValue("targetCombined", values.combined);
+  setValue("targetBromine", values.bromine);
+  setValue("targetPh", values.ph);
+  setValue("targetAlkalinity", values.alkalinity);
+  setValue("targetCalcium", values.calcium);
+  setValue("targetCya", values.cya);
+  setValue("targetSalt", values.salt);
+}
+
 function setTargetsFromProfile() {
-  const targets = currentDefaultTargets();
-  setValue("targetChlorine", targets.chlorine);
-  setValue("targetCombined", targets.combined);
-  setValue("targetBromine", targets.bromine);
-  setValue("targetPh", targets.ph);
-  setValue("targetAlkalinity", targets.alkalinity);
-  setValue("targetCalcium", targets.calcium);
-  setValue("targetCya", targets.cya);
-  setValue("targetSalt", targets.salt);
+  setTargetInputs(currentDefaultTargets());
   updateVisibility();
   saveState();
   calculate();
@@ -526,7 +594,8 @@ function savePoolSettings(key = currentPoolKey()) {
     sanitizer: selected("sanitizer"),
     surface,
     volume,
-    allowCya: true
+    allowCya: true,
+    targets: targetsFromInputs()
   };
 }
 
@@ -542,6 +611,7 @@ function applyPoolProfile(key = currentPoolKey()) {
   setValue("surfaceType", surface);
   setRadio("vesselType", settings.vesselType || "pool");
   setRadio("sanitizer", settings.sanitizer || "chlorine");
+  setTargetInputs(settings.targets || currentDefaultTargets());
   lastPoolKey = key;
   updateVisibility();
   calculate();
@@ -697,8 +767,9 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
   const total = numberValue("totalChlorine");
   const combined = syncCombinedChlorine();
   const combinedLevel = combined === null ? null : truncateToDecimals(combined, 2);
-  const target = positiveNumber("targetChlorine", currentDefaultTargets().chlorine);
-  const combinedAction = positiveNumber("targetCombined", 1);
+  const defaults = currentDefaultTargets();
+  const target = positiveNumber("targetChlorine", defaults.chlorine);
+  const combinedAction = positiveNumber("targetCombined", defaults.combined);
   const unit = concentrationUnitSuffix();
   const liquidName = chemicalName("liquidChlorineName", "liquid chlorine");
   const granularName = chemicalName("granularChlorineName", "granular chlorine");
@@ -799,7 +870,8 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
 
 function calculateBromine(cards, volume) {
   const bromine = numberValue("bromine");
-  const target = positiveNumber("targetBromine", 4);
+  const defaults = currentDefaultTargets();
+  const target = positiveNumber("targetBromine", defaults.bromine);
   const strength = positiveNumber("bromineStrength", 61);
   const unit = concentrationUnitSuffix();
   const bromineName = chemicalName("bromineName", "bromine granules");
@@ -841,7 +913,8 @@ function calculateBromine(cards, volume) {
 
 function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
   const ph = numberValue("ph");
-  const target = positiveNumber("targetPh", selected("sanitizer") === "bromine" ? 7.6 : 7.5);
+  const defaults = currentDefaultTargets();
+  const target = positiveNumber("targetPh", defaults.ph);
   const acidName = chemicalName("acidName", "hydrochloric acid");
   const dryAcidName = chemicalName("dryAcidName", "dry acid");
   const phUpName = chemicalName("phUpName", "sodium bicarbonate");
@@ -888,7 +961,8 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
 
 function calculateAlkalinity(cards, volume, hydrochloricStrength) {
   const current = numberValue("alkalinity");
-  const target = positiveNumber("targetAlkalinity", 100);
+  const defaults = currentDefaultTargets();
+  const target = positiveNumber("targetAlkalinity", defaults.alkalinity);
   const unit = concentrationUnitSuffix();
   const acidName = chemicalName("acidName", "hydrochloric acid");
   const dryAcidName = chemicalName("dryAcidName", "dry acid");
@@ -934,7 +1008,8 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
 
 function calculateCalcium(cards, volume) {
   const current = numberValue("calcium");
-  const target = positiveNumber("targetCalcium", 250);
+  const defaults = currentDefaultTargets();
+  const target = positiveNumber("targetCalcium", defaults.calcium);
   const purity = positiveNumber("calciumPurity", 77);
   const unit = concentrationUnitSuffix();
   const calciumName = chemicalName("calciumName", "calcium chloride");
@@ -978,7 +1053,8 @@ function calculateCya(cards, volume, sanitizer) {
   const current = numberValue("cya");
   if (current === null || sanitizer === "bromine" || !activePoolAllowsCya()) return;
 
-  const target = positiveNumber("targetCya", 30);
+  const defaults = currentDefaultTargets();
+  const target = positiveNumber("targetCya", defaults.cya);
   const purity = positiveNumber("stabilizerPurity", 100);
   const unit = concentrationUnitSuffix();
   const stabilizerName = chemicalName("stabilizerName", "stabiliser");
@@ -1020,7 +1096,8 @@ function calculateSalt(cards, volume, sanitizer) {
   const current = numberValue("salt");
   if (current === null || (sanitizer !== "salt" && sanitizer !== "mineral")) return;
 
-  const target = positiveNumber("targetSalt", 4000);
+  const defaults = currentDefaultTargets();
+  const target = positiveNumber("targetSalt", defaults.salt);
   const systemName = sanitizer === "mineral" ? "mineral system" : "salt chlorinator";
   const unit = concentrationUnitSuffix();
   const saltName = chemicalName("saltName", "pool salt");
@@ -1232,15 +1309,16 @@ function currentReadingsSnapshot() {
 }
 
 function currentTargetSnapshot() {
+  const defaults = currentDefaultTargets();
   return {
-    chlorine: positiveNumber("targetChlorine", currentDefaultTargets().chlorine),
-    combined: positiveNumber("targetCombined", 1),
-    bromine: positiveNumber("targetBromine", 4),
-    ph: positiveNumber("targetPh", selected("sanitizer") === "bromine" ? 7.6 : 7.5),
-    alkalinity: positiveNumber("targetAlkalinity", 100),
-    calcium: positiveNumber("targetCalcium", 250),
-    cya: positiveNumber("targetCya", activePoolAllowsCya() ? 30 : 0),
-    salt: positiveNumber("targetSalt", usesSaltReading() ? 4000 : 0)
+    chlorine: positiveNumber("targetChlorine", defaults.chlorine),
+    combined: positiveNumber("targetCombined", defaults.combined),
+    bromine: positiveNumber("targetBromine", defaults.bromine),
+    ph: positiveNumber("targetPh", defaults.ph),
+    alkalinity: positiveNumber("targetAlkalinity", defaults.alkalinity),
+    calcium: positiveNumber("targetCalcium", defaults.calcium),
+    cya: positiveNumber("targetCya", defaults.cya),
+    salt: positiveNumber("targetSalt", defaults.salt)
   };
 }
 
@@ -1606,7 +1684,8 @@ function newProfile() {
     vesselType: "pool",
     sanitizer: "chlorine",
     surface: "fibreglass",
-    allowCya: true
+    allowCya: true,
+    targets: defaultTargetsFor("fibreglass", "chlorine", true)
   };
   renderProfileOptions(key);
   applyPoolProfile(key);
@@ -1799,9 +1878,7 @@ function bindEvents() {
   });
 
   $("surfaceType").addEventListener("change", () => {
-    savePoolSettings();
-    saveState();
-    calculate();
+    setTargetsFromProfile();
   });
 
   all('input[name="vesselType"]').forEach((input) => {
@@ -1923,7 +2000,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260606-theme-polish", {
+    navigator.serviceWorker.register("service-worker.js?v=20260606-surface-targets", {
       updateViaCache: "none"
     }).catch(() => {});
   });
