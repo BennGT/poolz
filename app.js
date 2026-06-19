@@ -1852,7 +1852,6 @@ function showInstallGuide(platform) {
 function startMobileSplash() {
   const splash = $("mobileSplash");
   if (!splash) return;
-  const audio = $("splashAudio");
 
   const isMobile = typeof window !== "undefined"
     && window.matchMedia
@@ -1863,33 +1862,12 @@ function startMobileSplash() {
     return;
   }
 
-  const playSplashAudio = () => {
-    if (!audio) return;
-    audio.currentTime = 0;
-    audio.volume = 0.85;
-    const playPromise = audio.play();
-    if (playPromise && typeof playPromise.catch === "function") {
-      playPromise.catch(() => null);
-    }
-  };
-
-  const playOnFirstGesture = () => {
-    playSplashAudio();
-    splash.removeEventListener("pointerdown", playOnFirstGesture);
-    document.removeEventListener("pointerdown", playOnFirstGesture);
-  };
-
   const hideSplash = () => {
-    splash.removeEventListener("pointerdown", playOnFirstGesture);
-    document.removeEventListener("pointerdown", playOnFirstGesture);
     splash.classList.add("is-hidden");
     window.setTimeout(() => splash.remove(), 480);
   };
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  playSplashAudio();
-  splash.addEventListener("pointerdown", playOnFirstGesture, { once: true });
-  document.addEventListener("pointerdown", playOnFirstGesture, { once: true });
   window.setTimeout(hideSplash, reducedMotion ? 700 : 1800);
   splash.addEventListener("click", hideSplash, { once: true });
 }
@@ -2075,7 +2053,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260619-splash-audio", {
+    navigator.serviceWorker.register("service-worker.js?v=20260619-balance-salt", {
       updateViaCache: "none"
     }).catch(() => {});
   });
