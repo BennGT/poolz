@@ -2,7 +2,7 @@
 
 A clean consumer version of the pool chemical dose calculator.
 
-This version is separate from the Rock N Water build in the parent folder. It is set up for personal pool owners to save pool setups on-device.
+This version is separate from the Rock N Water build in the sibling `RNW Poolz` folder. It is set up for personal pool owners to save pool setups on-device.
 
 ## Current Features
 
