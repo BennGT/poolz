@@ -2053,7 +2053,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260619-balance-salt", {
+    navigator.serviceWorker.register("service-worker.js?v=20260701-opening-text", {
       updateViaCache: "none"
     }).catch(() => {});
   });
