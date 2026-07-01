@@ -2053,7 +2053,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260701-pool-ez-logo", {
+    navigator.serviceWorker.register("service-worker.js?v=20260701-transparent-logo", {
       updateViaCache: "none"
     }).catch(() => {});
   });
