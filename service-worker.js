@@ -1,25 +1,70 @@
-# POOLZ
+const CACHE_NAME = "poolz-dose-v25";
+const ASSET_VERSION = "20260701-disclaimer";
+const APP_SHELL = [
+  "./",
+  "./index.html",
+  `./styles.css?v=${ASSET_VERSION}`,
+  `./app.js?v=${ASSET_VERSION}`,
+  `./manifest.webmanifest?v=${ASSET_VERSION}`,
+  `./assets/poolz-logo.png?v=${ASSET_VERSION}`,
+  `./assets/app-icon-32.png?v=${ASSET_VERSION}`,
+  `./assets/app-icon-180.png?v=${ASSET_VERSION}`,
+  `./assets/app-icon-192.png?v=${ASSET_VERSION}`,
+  `./assets/app-icon-512.png?v=${ASSET_VERSION}`
+];
 
-A clean consumer version of the pool chemical dose calculator.
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
+  );
+  self.skipWaiting();
+});
 
-This version is separate from the Rock N Water build in the sibling `RNW Poolz` folder. It is set up for personal pool owners to save pool setups on-device.
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.map((key) => (key === CACHE_NAME ? null : caches.delete(key))))
+    )
+  );
+  self.clients.claim();
+});
 
-## Current Features
+function networkFirst(request, fallbackUrl) {
+  return fetch(request)
+    .then((response) => {
+      const copy = response.clone();
+      caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+      return response;
+    })
+    .catch(() => caches.match(request).then((cached) => cached || caches.match(fallbackUrl)));
+}
 
-- My Pool page for creating, switching, editing, and deleting saved pool profiles.
-- Pool types: chlorine, salt, mineral, and bromine.
-- Volume calculator using length, width, and average depth.
-- Test result display can switch between ppm and mg/L.
-- Flexible test entry with all core and extended readings available.
-- Calculate button flow with safety reminders shown before dosing results.
-- Editable targets, custom chemical names, and chemical strengths.
-- Local test history with trend charts.
-- Installable web app shell with manifest and service worker.
+function cacheFirst(request) {
+  return caches.match(request).then((cached) =>
+    cached || fetch(request).then((response) => {
+      const copy = response.clone();
+      caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+      return response;
+    })
+  );
+}
 
-## Logo
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
 
-The current POOLZ build uses the supplied POOLZ logo, generated app icons from that artwork, and a blue wave visual theme.
+  const url = new URL(event.request.url);
+  const isLocalAsset = url.origin === self.location.origin;
+  const isFreshAsset =
+    event.request.mode === "navigate"
+    || url.pathname.endsWith("/index.html")
+    || url.pathname.endsWith("/app.js")
+    || url.pathname.endsWith("/styles.css")
+    || url.pathname.endsWith("/manifest.webmanifest");
 
-## Store Launch Note
+  if (isLocalAsset && isFreshAsset) {
+    event.respondWith(networkFirst(event.request, "./index.html"));
+    return;
+  }
 
-For Play Store and iOS App Store release, this web app can later be wrapped with Capacitor or another native shell. The app store build should use final POOLZ icons, splash screens, app IDs, privacy text, and store metadata.
+  event.respondWith(cacheFirst(event.request));
+});
