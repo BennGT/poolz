@@ -364,7 +364,7 @@ function poolVolumeInputToLitres() {
 
 function updatePoolVolumeExample() {
   if ($("poolVolume")) $("poolVolume").placeholder = selectedVolumeExample();
-  if ($("poolVolumeHint")) $("poolVolumeHint").textContent = "Not sure your pool size? Volume calculator below.";
+  if ($("poolVolumeHint")) $("poolVolumeHint").textContent = "Not sure your pool size? Use the volume calculator below.";
 }
 
 function formatPoolVolume(litres) {
@@ -2366,7 +2366,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260702-my-pool-pal-logo", {
+    navigator.serviceWorker.register("service-worker.js?v=20260703-home", {
       updateViaCache: "none"
     }).catch(() => {});
   });

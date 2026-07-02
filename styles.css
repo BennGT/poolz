@@ -250,6 +250,140 @@ button {
   display: block;
 }
 
+.home-page {
+  display: grid;
+  gap: 18px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 12px 28px 34px;
+}
+
+.home-intro {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(3, 169, 230, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(221, 248, 255, 0.90)),
+    radial-gradient(120% 90% at 100% 0%, rgba(3, 169, 230, 0.24), rgba(3, 169, 230, 0));
+  box-shadow: 0 24px 70px rgba(0, 47, 104, 0.12);
+  padding: 22px;
+}
+
+.home-intro::before,
+.home-intro::after {
+  content: "";
+  position: absolute;
+  right: -8%;
+  left: 42%;
+  height: 88px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.home-intro::before {
+  bottom: -38px;
+  background: rgba(0, 58, 120, 0.18);
+  transform: rotate(-3deg);
+}
+
+.home-intro::after {
+  bottom: 2px;
+  background: rgba(255, 255, 255, 0.78);
+  transform: rotate(4deg);
+}
+
+.home-intro > div {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 7px;
+  max-width: 760px;
+}
+
+.home-intro h2 {
+  margin: 0;
+  color: var(--teal-dark);
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.home-intro p {
+  margin: 0;
+  color: #2e4b5c;
+  font-size: 1rem;
+  font-weight: 820;
+  line-height: 1.42;
+}
+
+.home-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.home-nav-card {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  min-width: 0;
+  min-height: 178px;
+  border: 1px solid rgba(3, 169, 230, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.90);
+  color: #263431;
+  box-shadow: 0 18px 42px rgba(0, 47, 104, 0.10);
+  padding: 16px;
+  text-align: left;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.home-nav-card:hover,
+.home-nav-card:focus-visible {
+  border-color: rgba(0, 87, 184, 0.42);
+  background: #eefaff;
+  box-shadow: 0 22px 48px rgba(0, 47, 104, 0.16);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.home-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 1px solid rgba(3, 169, 230, 0.18);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 34%),
+    linear-gradient(135deg, #d7f7ff, #03a9e6 58%, #0057b8);
+  color: #ffffff;
+  box-shadow: inset 0 -6px 14px rgba(0, 58, 120, 0.22);
+}
+
+.home-icon svg {
+  width: 34px;
+  height: 34px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.home-nav-card strong {
+  color: var(--teal-dark);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.home-nav-card > span:last-child {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(330px, 430px);
@@ -1088,6 +1222,10 @@ details summary strong {
     grid-template-columns: 1fr;
   }
 
+  .home-nav-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .results-panel {
     position: static;
   }
@@ -1234,6 +1372,62 @@ details summary strong {
 
   .layout {
     padding: 8px 14px 24px;
+  }
+
+  .home-page {
+    gap: 12px;
+    padding: 8px 14px 24px;
+  }
+
+  .home-intro {
+    padding: 16px;
+  }
+
+  .home-intro::before,
+  .home-intro::after {
+    left: 18%;
+    right: -24%;
+    height: 64px;
+  }
+
+  .home-intro h2 {
+    font-size: 1.12rem;
+  }
+
+  .home-intro p {
+    font-size: 0.92rem;
+  }
+
+  .home-nav-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .home-nav-card {
+    grid-template-columns: 54px minmax(0, 1fr);
+    align-items: center;
+    min-height: 92px;
+    padding: 13px;
+  }
+
+  .home-icon {
+    grid-row: span 2;
+    width: 50px;
+    height: 50px;
+  }
+
+  .home-icon svg {
+    width: 29px;
+    height: 29px;
+  }
+
+  .home-nav-card strong {
+    align-self: end;
+  }
+
+  .home-nav-card > span:last-child {
+    align-self: start;
+    font-size: 0.84rem;
   }
 
   .single-page {

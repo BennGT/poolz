@@ -10,17 +10,17 @@
     <meta name="application-name" content="My Pool Pal">
     <meta name="description" content="My Pool Pal pool chemistry and dosing calculator.">
     <title>My Pool Pal</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260702-my-pool-pal-logo">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260702-my-pool-pal-logo">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260702-my-pool-pal-logo">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260702-my-pool-pal-logo">
-    <link rel="stylesheet" href="styles.css?v=20260702-my-pool-pal-logo">
-    <script defer src="app.js?v=20260702-my-pool-pal-logo"></script>
+    <link rel="manifest" href="manifest.webmanifest?v=20260703-home">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260703-home">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260703-home">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260703-home">
+    <link rel="stylesheet" href="styles.css?v=20260703-home">
+    <script defer src="app.js?v=20260703-home"></script>
   </head>
   <body>
     <div id="mobileSplash" class="mobile-splash" aria-hidden="true">
       <div class="mobile-splash-content">
-        <img src="assets/poolz-logo.png?v=20260702-my-pool-pal-logo" alt="">
+        <img src="assets/poolz-logo.png?v=20260703-home" alt="">
         <div>
           <p>Use your preferred testing method, enter your water readings, and receive instant chemical dosing recommendations</p>
           <p class="disclaimer-text">Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</p>
@@ -37,7 +37,7 @@
         </button>
 
         <div class="brand">
-          <img class="brand-logo" src="assets/poolz-logo.png?v=20260702-my-pool-pal-logo" alt="My Pool Pal">
+          <img class="brand-logo" src="assets/poolz-logo.png?v=20260703-home" alt="My Pool Pal">
           <h1>My Pool Pal</h1>
         </div>
       </div>
@@ -50,7 +50,8 @@
         <strong>Menu</strong>
         <button id="drawerClose" class="icon-close" type="button" aria-label="Close menu"></button>
       </div>
-      <button class="drawer-link is-active" type="button" data-nav-page="calculator">Chemical calculator</button>
+      <button class="drawer-link is-active" type="button" data-nav-page="home">Home</button>
+      <button class="drawer-link" type="button" data-nav-page="calculator">Chemical calculator</button>
       <button class="drawer-link" type="button" data-nav-page="pools">My Pool</button>
       <button class="drawer-link" type="button" data-nav-page="volume">Volume calculator</button>
       <button class="drawer-link" type="button" data-nav-page="targets">Edit targets</button>
@@ -61,6 +62,115 @@
 
     <main class="app-shell">
       <input type="radio" name="testSet" value="full" checked hidden>
+
+      <section id="page-home" class="app-page is-active" data-page-panel="home">
+        <div class="home-page">
+          <section class="home-intro" aria-labelledby="homeTitle">
+            <div>
+              <h2 id="homeTitle">Choose a section</h2>
+              <p>Use your preferred testing method, enter your water readings, and receive instant chemical dosing recommendations</p>
+            </div>
+          </section>
+
+          <nav class="home-nav-grid" aria-label="App sections">
+            <button class="home-nav-card" type="button" data-nav-page="calculator">
+              <span class="home-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" focusable="false">
+                  <path d="M18 7h12"></path>
+                  <path d="M21 7v11L12 34a6 6 0 0 0 5.2 9h13.6a6 6 0 0 0 5.2-9L27 18V7"></path>
+                  <path d="M16 32h16"></path>
+                  <path d="M20 37h8"></path>
+                </svg>
+              </span>
+              <strong>Chemical calculator</strong>
+              <span>Test readings and dosing results</span>
+            </button>
+
+            <button class="home-nav-card" type="button" data-nav-page="pools">
+              <span class="home-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" focusable="false">
+                  <path d="M8 29c5 0 5-3 10-3s5 3 10 3 5-3 12-3"></path>
+                  <path d="M8 37c5 0 5-3 10-3s5 3 10 3 5-3 12-3"></path>
+                  <path d="M12 22V10h24v12"></path>
+                  <path d="M18 22v-6h12v6"></path>
+                </svg>
+              </span>
+              <strong>My Pool</strong>
+              <span>Profiles, volume, surface, and sanitiser</span>
+            </button>
+
+            <button class="home-nav-card" type="button" data-nav-page="volume">
+              <span class="home-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" focusable="false">
+                  <path d="M10 36h28"></path>
+                  <path d="M14 12v24"></path>
+                  <path d="M34 12v24"></path>
+                  <path d="M14 16h20"></path>
+                  <path d="M14 24h20"></path>
+                  <path d="M14 32h20"></path>
+                </svg>
+              </span>
+              <strong>Volume calculator</strong>
+              <span>Pool and spa water volume</span>
+            </button>
+
+            <button class="home-nav-card" type="button" data-nav-page="targets">
+              <span class="home-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" focusable="false">
+                  <circle cx="24" cy="24" r="16"></circle>
+                  <circle cx="24" cy="24" r="8"></circle>
+                  <path d="M24 4v6"></path>
+                  <path d="M24 38v6"></path>
+                  <path d="M4 24h6"></path>
+                  <path d="M38 24h6"></path>
+                </svg>
+              </span>
+              <strong>Edit targets</strong>
+              <span>Desired levels and acceptable ranges</span>
+            </button>
+
+            <button class="home-nav-card" type="button" data-nav-page="chemicals">
+              <span class="home-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" focusable="false">
+                  <path d="M19 7h10"></path>
+                  <path d="M21 7v12L12 35a5.5 5.5 0 0 0 4.8 8h14.4a5.5 5.5 0 0 0 4.8-8L27 19V7"></path>
+                  <path d="M16 34c4 2 7-2 11 0 2 .9 3.8 1 5.5.3"></path>
+                  <path d="M34 11l4 4"></path>
+                  <path d="M38 11l-4 4"></path>
+                </svg>
+              </span>
+              <strong>Edit chemicals</strong>
+              <span>Product names and strengths</span>
+            </button>
+
+            <button class="home-nav-card" type="button" data-nav-page="history">
+              <span class="home-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" focusable="false">
+                  <path d="M8 38h32"></path>
+                  <path d="M10 34l8-9 7 5 12-16"></path>
+                  <path d="M10 10v28"></path>
+                  <circle cx="18" cy="25" r="2"></circle>
+                  <circle cx="25" cy="30" r="2"></circle>
+                  <circle cx="37" cy="14" r="2"></circle>
+                </svg>
+              </span>
+              <strong>History</strong>
+              <span>Saved tests and trends</span>
+            </button>
+
+            <button class="home-nav-card" type="button" data-nav-page="safety">
+              <span class="home-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" focusable="false">
+                  <path d="M24 5l16 6v11c0 10-6.5 17-16 21C14.5 39 8 32 8 22V11l16-6z"></path>
+                  <path d="M17 24l5 5 10-11"></path>
+                </svg>
+              </span>
+              <strong>Safety</strong>
+              <span>Chemical handling reminders</span>
+            </button>
+          </nav>
+        </div>
+      </section>
 
       <section id="page-pools" class="app-page" data-page-panel="pools">
         <div class="single-page">
@@ -88,7 +198,7 @@
               <label class="field pool-volume-field">
                 <span>Pool volume</span>
                 <input id="poolVolume" type="number" min="1" step="1" inputmode="decimal" value="50000" placeholder="eg: 50,000 L">
-                <small id="poolVolumeHint">Not sure your pool size? Volume calculator below.</small>
+                <small id="poolVolumeHint">Not sure your pool size? Use the volume calculator below.</small>
               </label>
 
               <div class="volume-link-field">
@@ -128,7 +238,7 @@
         </div>
       </section>
 
-      <section id="page-calculator" class="app-page is-active" data-page-panel="calculator">
+      <section id="page-calculator" class="app-page" data-page-panel="calculator">
         <div class="layout">
           <section class="workbench" aria-label="Pool chemistry inputs">
             <section class="panel">
