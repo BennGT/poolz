@@ -26,13 +26,29 @@ const valueIds = [
   "salt",
   "waterTemperature",
   "targetChlorine",
+  "targetChlorineMin",
+  "targetChlorineMax",
   "targetCombined",
+  "targetCombinedMin",
+  "targetCombinedMax",
   "targetBromine",
+  "targetBromineMin",
+  "targetBromineMax",
   "targetPh",
+  "targetPhMin",
+  "targetPhMax",
   "targetAlkalinity",
+  "targetAlkalinityMin",
+  "targetAlkalinityMax",
   "targetCalcium",
+  "targetCalciumMin",
+  "targetCalciumMax",
   "targetCya",
+  "targetCyaMin",
+  "targetCyaMax",
   "targetSalt",
+  "targetSaltMin",
+  "targetSaltMax",
   "liquidChlorineName",
   "liquidChlorineStrength",
   "granularChlorineName",
@@ -63,7 +79,7 @@ const readingIds = [
   "waterTemperature"
 ];
 
-const targetIds = [
+const targetDesiredIds = [
   "targetChlorine",
   "targetCombined",
   "targetBromine",
@@ -74,6 +90,27 @@ const targetIds = [
   "targetSalt"
 ];
 
+const targetRangeIds = [
+  "targetChlorineMin",
+  "targetChlorineMax",
+  "targetCombinedMin",
+  "targetCombinedMax",
+  "targetBromineMin",
+  "targetBromineMax",
+  "targetPhMin",
+  "targetPhMax",
+  "targetAlkalinityMin",
+  "targetAlkalinityMax",
+  "targetCalciumMin",
+  "targetCalciumMax",
+  "targetCyaMin",
+  "targetCyaMax",
+  "targetSaltMin",
+  "targetSaltMax"
+];
+
+const targetIds = [...targetDesiredIds, ...targetRangeIds];
+
 const targetFieldMap = {
   targetChlorine: "chlorine",
   targetCombined: "combined",
@@ -83,6 +120,17 @@ const targetFieldMap = {
   targetCalcium: "calcium",
   targetCya: "cya",
   targetSalt: "salt"
+};
+
+const targetRangeFieldMap = {
+  chlorine: { min: "targetChlorineMin", max: "targetChlorineMax" },
+  combined: { min: "targetCombinedMin", max: "targetCombinedMax" },
+  bromine: { min: "targetBromineMin", max: "targetBromineMax" },
+  ph: { min: "targetPhMin", max: "targetPhMax" },
+  alkalinity: { min: "targetAlkalinityMin", max: "targetAlkalinityMax" },
+  calcium: { min: "targetCalciumMin", max: "targetCalciumMax" },
+  cya: { min: "targetCyaMin", max: "targetCyaMax" },
+  salt: { min: "targetSaltMin", max: "targetSaltMax" }
 };
 
 const surfaceTargetDefaults = {
@@ -100,6 +148,24 @@ const surfaceTargetDefaults = {
     ph: 7.4,
     alkalinity: 90,
     calcium: 175
+  }
+};
+
+const surfaceTargetRangeDefaults = {
+  concrete: {
+    ph: { min: 7.2, max: 7.8 },
+    alkalinity: { min: 80, max: 120 },
+    calcium: { min: 200, max: 500 }
+  },
+  fibreglass: {
+    ph: { min: 7.2, max: 7.8 },
+    alkalinity: { min: 80, max: 120 },
+    calcium: { min: 150, max: 500 }
+  },
+  vinyl: {
+    ph: { min: 7.2, max: 7.8 },
+    alkalinity: { min: 80, max: 120 },
+    calcium: { min: 150, max: 500 }
   }
 };
 
@@ -508,10 +574,12 @@ function clamp(value, min, max) {
 function defaultTargetsFor(surface, sanitizer, cyaAllowed) {
   const surfaceDefaults = surfaceTargetDefaults[normalizedSurface(surface)] || surfaceTargetDefaults.fibreglass;
 
+  let targets;
+
   if (sanitizer === "bromine") {
-    return {
+    targets = {
       chlorine: 1.5,
-      combined: 1,
+      combined: 0.2,
       bromine: 4,
       ph: Math.max(surfaceDefaults.ph, 7.6),
       alkalinity: surfaceDefaults.alkalinity,
@@ -519,18 +587,75 @@ function defaultTargetsFor(surface, sanitizer, cyaAllowed) {
       cya: 0,
       salt: 0
     };
+  } else {
+    targets = {
+      chlorine: sanitizer === "salt" || sanitizer === "mineral" || cyaAllowed ? 2 : 1.5,
+      combined: 0.2,
+      bromine: 4,
+      ph: surfaceDefaults.ph,
+      alkalinity: surfaceDefaults.alkalinity,
+      calcium: surfaceDefaults.calcium,
+      cya: cyaAllowed ? 30 : 0,
+      salt: sanitizer === "salt" || sanitizer === "mineral" ? 4000 : 0
+    };
   }
 
   return {
-    chlorine: sanitizer === "salt" || sanitizer === "mineral" || cyaAllowed ? 2 : 1.5,
-    combined: 1,
-    bromine: 4,
-    ph: surfaceDefaults.ph,
-    alkalinity: surfaceDefaults.alkalinity,
-    calcium: surfaceDefaults.calcium,
-    cya: cyaAllowed ? 30 : 0,
-    salt: sanitizer === "salt" || sanitizer === "mineral" ? 4000 : 0
+    ...targets,
+    ranges: defaultTargetRangesFor(surface, sanitizer, cyaAllowed, targets)
   };
+}
+
+function defaultTargetRangesFor(surface, sanitizer, cyaAllowed, targets) {
+  const surfaceRanges = surfaceTargetRangeDefaults[normalizedSurface(surface)] || surfaceTargetRangeDefaults.fibreglass;
+  const usesSalt = sanitizer === "salt" || sanitizer === "mineral";
+  const ranges = {
+    chlorine: { min: 1, max: 5 },
+    combined: { min: 0, max: 1 },
+    bromine: { min: 2, max: 8 },
+    ph: surfaceRanges.ph,
+    alkalinity: surfaceRanges.alkalinity,
+    calcium: surfaceRanges.calcium,
+    cya: cyaAllowed ? { min: 30, max: 50 } : { min: 0, max: 0 },
+    salt: usesSalt ? { min: 3000, max: 5000 } : { min: 0, max: 0 }
+  };
+
+  return normalizeTargetRanges(ranges, ranges, targets);
+}
+
+function finiteNumberOrNull(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function normalizeTargetRange(range, fallback, desired) {
+  const fallbackRange = fallback || { min: desired || 0, max: desired || 0 };
+  let min = finiteNumberOrNull(range && range.min);
+  let max = finiteNumberOrNull(range && range.max);
+  const desiredValue = finiteNumberOrNull(desired);
+
+  if (min === null) min = finiteNumberOrNull(fallbackRange.min);
+  if (max === null) max = finiteNumberOrNull(fallbackRange.max);
+  if (min === null) min = desiredValue === null ? 0 : desiredValue;
+  if (max === null) max = desiredValue === null ? min : desiredValue;
+  if (min > max) [min, max] = [max, min];
+
+  if (desiredValue !== null) {
+    min = Math.min(min, desiredValue);
+    max = Math.max(max, desiredValue);
+  }
+
+  return { min, max };
+}
+
+function normalizeTargetRanges(ranges, fallbackRanges, targets) {
+  return Object.fromEntries(
+    Object.keys(targetRangeFieldMap).map((key) => [
+      key,
+      normalizeTargetRange((ranges || {})[key], (fallbackRanges || {})[key], (targets || {})[key])
+    ])
+  );
 }
 
 function currentDefaultTargets() {
@@ -541,19 +666,40 @@ function currentDefaultTargets() {
 
 function targetsFromInputs() {
   const defaults = currentDefaultTargets();
-  return Object.fromEntries(
+  const targets = Object.fromEntries(
     Object.entries(targetFieldMap).map(([inputId, key]) => {
       const value = numberValue(inputId);
       return [key, value === null ? defaults[key] : value];
     })
   );
+  targets.ranges = Object.fromEntries(
+    Object.entries(targetRangeFieldMap).map(([key, ids]) => {
+      const fallback = (defaults.ranges || {})[key];
+      return [
+        key,
+        normalizeTargetRange(
+          {
+            min: numberValue(ids.min),
+            max: numberValue(ids.max)
+          },
+          fallback,
+          targets[key]
+        )
+      ];
+    })
+  );
+  return targets;
 }
 
 function normalizeTargets(targets) {
   const defaults = currentDefaultTargets();
-  return {
+  const values = {
     ...defaults,
     ...(targets || {})
+  };
+  values.ranges = normalizeTargetRanges((targets || {}).ranges, defaults.ranges, values);
+  return {
+    ...values
   };
 }
 
@@ -567,6 +713,11 @@ function setTargetInputs(targets) {
   setValue("targetCalcium", values.calcium);
   setValue("targetCya", values.cya);
   setValue("targetSalt", values.salt);
+  Object.entries(targetRangeFieldMap).forEach(([key, ids]) => {
+    const range = values.ranges[key];
+    setValue(ids.min, range.min);
+    setValue(ids.max, range.max);
+  });
 }
 
 function setTargetsFromProfile() {
@@ -737,8 +888,8 @@ function calculate({ showResults = false } = {}) {
       title: "No dose needed",
       badge: "ok",
       amount: "Balanced",
-      chemical: "for the saved targets",
-      body: "Keep circulating and retest on the normal schedule.",
+      chemical: "for the saved ranges",
+      body: "Readings entered are inside the saved acceptable ranges. Keep circulating and retest on the normal schedule.",
       effect: "No chemical change is recommended from the readings entered."
     });
   }
@@ -760,15 +911,16 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
   const total = numberValue("totalChlorine");
   const combined = syncCombinedChlorine();
   const combinedLevel = combined === null ? null : truncateToDecimals(combined, 2);
-  const defaults = currentDefaultTargets();
-  const target = positiveNumber("targetChlorine", defaults.chlorine);
-  const combinedAction = positiveNumber("targetCombined", defaults.combined);
+  const targets = targetsFromInputs();
+  const target = targets.chlorine;
+  const chlorineRange = targets.ranges.chlorine;
+  const combinedAction = targets.ranges.combined.max;
   const unit = concentrationUnitSuffix();
   const liquidName = chemicalName("liquidChlorineName", "liquid chlorine");
   const granularName = chemicalName("granularChlorineName", "granular chlorine");
 
   if (free !== null) {
-    if (free < target - 0.1) {
+    if (free < chlorineRange.min) {
       const delta = target - free;
       const liquidMl = ppmDose(volume, delta, liquidStrength);
       const granularGrams = ppmDose(volume, delta, granularStrength);
@@ -777,7 +929,7 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
         badge: "dose",
         amount: formatVolume(liquidMl),
         chemical: `${formatNumber(liquidStrength, 1)}% ${liquidName}`,
-        body: `Raises free chlorine by about ${formatNumber(delta, 1)}${unit} to ${formatNumber(target, 1)}${unit}.`,
+        body: `Free chlorine is below the acceptable range of ${formatNumber(chlorineRange.min, 1)}-${formatNumber(chlorineRange.max, 1)}${unit}. Raises it by about ${formatNumber(delta, 1)}${unit} to the desired ${formatNumber(target, 1)}${unit}.`,
         effect: "Raises the active sanitiser residual. Liquid chlorine can also slowly add salt and nudge pH upward.",
         steps: [
           `Add ${formatVolume(liquidMl)} ${liquidName} with the pump running.`,
@@ -786,13 +938,13 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
         ],
         alt: [`Alternative: ${formatMass(granularGrams)} of ${formatNumber(granularStrength, 1)}% ${granularName}.`]
       });
-    } else if (free > target + 1.5) {
+    } else if (free > chlorineRange.max) {
       cards.push({
         title: "Free chlorine is high",
         badge: "watch",
         amount: "Hold",
         chemical: "chlorine dosing",
-        body: `Current free chlorine is ${formatNumber(free, 1)}${unit}. Let it drift down toward ${formatNumber(target, 1)}${unit} before adding more.`,
+        body: `Current free chlorine is ${formatNumber(free, 1)}${unit}, above the acceptable range of ${formatNumber(chlorineRange.min, 1)}-${formatNumber(chlorineRange.max, 1)}${unit}. Let it drift down toward the desired ${formatNumber(target, 1)}${unit} before adding more.`,
         effect: "Holding chlorine dosing lets the sanitiser residual reduce through normal demand, sunlight and circulation.",
         steps: [
           "Do not add more chlorine now.",
@@ -855,7 +1007,7 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
       badge: "ok",
       amount: `${formatTruncatedDecimal(combinedLevel, 2)}${unit}`,
       chemical: "combined chlorine",
-      body: `Combined chlorine is at or under the ${formatTruncatedDecimal(combinedAction, 2)}${unit} action level.`,
+      body: `Combined chlorine is at or under the acceptable maximum of ${formatTruncatedDecimal(combinedAction, 2)}${unit}.`,
       effect: "Pass for the entered free and total chlorine readings."
     });
   }
@@ -863,15 +1015,16 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
 
 function calculateBromine(cards, volume) {
   const bromine = numberValue("bromine");
-  const defaults = currentDefaultTargets();
-  const target = positiveNumber("targetBromine", defaults.bromine);
+  const targets = targetsFromInputs();
+  const target = targets.bromine;
+  const range = targets.ranges.bromine;
   const strength = positiveNumber("bromineStrength", 61);
   const unit = concentrationUnitSuffix();
   const bromineName = chemicalName("bromineName", "bromine granules");
 
   if (bromine === null) return;
 
-  if (bromine < target - 0.1) {
+  if (bromine < range.min) {
     const delta = target - bromine;
     const grams = ppmDose(volume, delta, strength);
     cards.push({
@@ -879,7 +1032,7 @@ function calculateBromine(cards, volume) {
       badge: "dose",
       amount: formatMass(grams),
       chemical: `${formatNumber(strength, 1)}% ${bromineName}`,
-      body: `Raises total bromine by about ${formatNumber(delta, 1)}${unit} to ${formatNumber(target, 1)}${unit}.`,
+      body: `Bromine is below the acceptable range of ${formatNumber(range.min, 1)}-${formatNumber(range.max, 1)}${unit}. Raises total bromine by about ${formatNumber(delta, 1)}${unit} to the desired ${formatNumber(target, 1)}${unit}.`,
       effect: "Raises the bromine sanitiser residual so the water can keep disinfecting between bather loads.",
       steps: [
         `Add ${formatMass(grams)} ${bromineName} with the pump running.`,
@@ -887,13 +1040,13 @@ function calculateBromine(cards, volume) {
         "Low bromine is usually from bather load, organic demand, or feeder output set too low."
       ]
     });
-  } else if (bromine > target + 2) {
+  } else if (bromine > range.max) {
     cards.push({
       title: "Bromine is high",
       badge: "watch",
       amount: "Hold",
       chemical: "bromine dosing",
-      body: `Current bromine is ${formatNumber(bromine, 1)}${unit}. Let it drift down toward ${formatNumber(target, 1)}${unit}.`,
+      body: `Current bromine is ${formatNumber(bromine, 1)}${unit}, above the acceptable range of ${formatNumber(range.min, 1)}-${formatNumber(range.max, 1)}${unit}. Let it drift down toward the desired ${formatNumber(target, 1)}${unit}.`,
       effect: "Holding bromine dosing lets the residual reduce through normal demand and dilution.",
       steps: [
         "Do not add more bromine now.",
@@ -906,15 +1059,17 @@ function calculateBromine(cards, volume) {
 
 function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
   const ph = numberValue("ph");
-  const defaults = currentDefaultTargets();
-  const target = positiveNumber("targetPh", defaults.ph);
-  const alkalinityTarget = positiveNumber("targetAlkalinity", defaults.alkalinity);
+  const targets = targetsFromInputs();
+  const target = targets.ph;
+  const range = targets.ranges.ph;
+  const alkalinityTarget = targets.alkalinity;
+  const alkalinityRange = targets.ranges.alkalinity;
   const acidName = chemicalName("acidName", "hydrochloric acid");
   const dryAcidName = chemicalName("dryAcidName", "dry acid");
 
   if (ph === null) return;
 
-  if (ph > target + 0.05) {
+  if (ph > range.max) {
     const drop = ph - target;
     const dryAcid = dryAcidForPh(volume, drop, alkalinity);
     const hydrochloric = hydrochloricForPh(volume, drop, alkalinity, hydrochloricStrength);
@@ -924,7 +1079,7 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
       badge: "dose",
       amount: formatVolume(hydrochloric),
       chemical: `${formatNumber(hydrochloricStrength, 1)}% ${acidName}`,
-      body: `Estimated drop from pH ${formatNumber(ph, 1)} to ${formatNumber(target, 1)}.${splitNote}`,
+      body: `pH is above the acceptable range of ${formatNumber(range.min, 1)}-${formatNumber(range.max, 1)}. Estimated drop from pH ${formatNumber(ph, 1)} to the desired ${formatNumber(target, 1)}.${splitNote}`,
       effect: "Lowers pH and also lowers total alkalinity a little.",
       steps: [
         `Add ${formatVolume(hydrochloric)} ${acidName} carefully with the pump running.`,
@@ -934,9 +1089,9 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
       ],
       alt: [`${dryAcidName} option: ${formatMass(dryAcid)}.`]
     });
-  } else if (ph < target - 0.05) {
-    const alkalinityIsLow = alkalinity !== null && alkalinity < alkalinityTarget - 5;
-    const alkalinityIsHigh = alkalinity !== null && alkalinity > alkalinityTarget + 15;
+  } else if (ph < range.min) {
+    const alkalinityIsLow = alkalinity !== null && alkalinity < alkalinityRange.min;
+    const alkalinityIsHigh = alkalinity !== null && alkalinity > alkalinityRange.max;
 
     if (alkalinityIsLow) {
       cards.push({
@@ -977,7 +1132,7 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
       badge: "watch",
       amount: "Aerate pool water first",
       chemical: "pH increaser if needed",
-      body: `pH is ${formatNumber(ph, 1)}. Raise it toward ${formatNumber(target, 1)} without chasing alkalinity at the same time.`,
+      body: `pH is below the acceptable range of ${formatNumber(range.min, 1)}-${formatNumber(range.max, 1)}. Raise it toward the desired ${formatNumber(target, 1)} without chasing alkalinity at the same time.`,
       effect: "Aeration raises pH without adding chemicals. pH increaser/soda ash raises pH faster but can also raise alkalinity.",
       steps: [
         "Run the pump and point return jets upward so the surface ripples.",
@@ -992,10 +1147,11 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
 
 function calculateAlkalinity(cards, volume, hydrochloricStrength) {
   const current = numberValue("alkalinity");
-  const defaults = currentDefaultTargets();
-  const target = positiveNumber("targetAlkalinity", defaults.alkalinity);
+  const targets = targetsFromInputs();
+  const target = targets.alkalinity;
+  const range = targets.ranges.alkalinity;
   const ph = numberValue("ph");
-  const phTarget = positiveNumber("targetPh", defaults.ph);
+  const phRange = targets.ranges.ph;
   const unit = concentrationUnitSuffix();
   const acidName = chemicalName("acidName", "hydrochloric acid");
   const dryAcidName = chemicalName("dryAcidName", "dry acid");
@@ -1003,12 +1159,12 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
 
   if (current === null) return;
 
-  if (current < target - 5) {
+  if (current < range.min) {
     const delta = target - current;
-    const phNote = ph !== null && ph < phTarget - 0.05
+    const phNote = ph !== null && ph < phRange.min
       ? " pH is also low, so retest pH after this before adding any pH increaser."
       : "";
-    if (ph !== null && ph > phTarget + 0.05) {
+    if (ph !== null && ph > phRange.max) {
       cards.push({
         title: "Alkalinity is low",
         badge: "watch",
@@ -1029,7 +1185,7 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
       badge: "dose",
       amount: formatMass(bicarbForAlkalinity(volume, delta)),
       chemical: alkalinityName,
-      body: `Raises total alkalinity by about ${formatNumber(delta, 0)}${unit}.${phNote}`,
+      body: `Alkalinity is below the acceptable range of ${formatNumber(range.min, 0)}-${formatNumber(range.max, 0)}${unit}. Raises total alkalinity by about ${formatNumber(delta, 0)}${unit} to the desired ${formatNumber(target, 0)}${unit}.${phNote}`,
       effect: "Sodium bicarbonate mainly raises alkalinity and only gently moves pH. It is better for buffering than pH-only correction.",
       steps: [
         `Add ${formatMass(bicarbForAlkalinity(volume, delta))} ${alkalinityName} with circulation.`,
@@ -1038,7 +1194,7 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
         "Low alkalinity makes pH unstable and is often caused by acid or dilution."
       ]
     });
-  } else if (current > target + 15) {
+  } else if (current > range.max) {
     const delta = current - target;
     const hydrochloric = acidForAlkalinity(volume, delta, hydrochloricStrength);
     const dryAcid = dryAcidForAlkalinity(volume, delta);
@@ -1047,7 +1203,7 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
       badge: "watch",
       amount: formatVolume(hydrochloric),
       chemical: `${acidName} total`,
-      body: "Use staged acid and aeration cycles; this is not a single-dose instruction.",
+      body: `Alkalinity is above the acceptable range of ${formatNumber(range.min, 0)}-${formatNumber(range.max, 0)}${unit}. Use staged acid and aeration cycles to move toward the desired ${formatNumber(target, 0)}${unit}; this is not a single-dose instruction.`,
       effect: "Acid lowers total alkalinity and pH. Aeration then raises pH back up without raising alkalinity again.",
       steps: [
         "Add acid in smaller staged doses to lower alkalinity.",
@@ -1062,22 +1218,23 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
 
 function calculateCalcium(cards, volume) {
   const current = numberValue("calcium");
-  const defaults = currentDefaultTargets();
-  const target = positiveNumber("targetCalcium", defaults.calcium);
+  const targets = targetsFromInputs();
+  const target = targets.calcium;
+  const range = targets.ranges.calcium;
   const purity = positiveNumber("calciumPurity", 77);
   const unit = concentrationUnitSuffix();
   const calciumName = chemicalName("calciumName", "calcium chloride");
 
   if (current === null) return;
 
-  if (current < target - 10) {
+  if (current < range.min) {
     const delta = target - current;
     cards.push({
       title: "Raise calcium hardness",
       badge: "dose",
       amount: formatMass(calciumChlorideForHardness(volume, delta, purity)),
       chemical: `${formatNumber(purity, 1)}% ${calciumName}`,
-      body: `Raises calcium hardness by about ${formatNumber(delta, 0)}${unit}.`,
+      body: `Hardness is below the acceptable range of ${formatNumber(range.min, 0)}-${formatNumber(range.max, 0)}${unit}. Raises calcium hardness by about ${formatNumber(delta, 0)}${unit} to the desired ${formatNumber(target, 0)}${unit}.`,
       effect: "Increases calcium hardness, which helps protect concrete surfaces and tile grout from aggressive water.",
       steps: [
         `Add ${formatMass(calciumChlorideForHardness(volume, delta, purity))} ${calciumName} slowly.`,
@@ -1085,14 +1242,14 @@ function calculateCalcium(cards, volume) {
         "Low hardness can make water aggressive to concrete, grout and tiled finishes."
       ]
     });
-  } else if (current > target + 100) {
+  } else if (current > range.max) {
     const fraction = replacementFraction(current, target);
     cards.push({
       title: "Calcium hardness is high",
       badge: "watch",
       amount: `${formatDoseNumber(fraction * 100)}%`,
       chemical: "water replacement",
-      body: `Approximate replacement volume: ${formatLitres(volume * fraction)}. Check source-water hardness first.`,
+      body: `Hardness is above the acceptable range of ${formatNumber(range.min, 0)}-${formatNumber(range.max, 0)}${unit}. Approximate replacement volume: ${formatLitres(volume * fraction)}. Check source-water hardness first.`,
       effect: "Dilutes calcium hardness; chemical additions cannot directly remove calcium from pool water.",
       steps: [
         `Replace about ${formatLitres(volume * fraction)} if source water is lower hardness.`,
@@ -1107,20 +1264,21 @@ function calculateCya(cards, volume, sanitizer) {
   const current = numberValue("cya");
   if (current === null || sanitizer === "bromine" || !activePoolAllowsCya()) return;
 
-  const defaults = currentDefaultTargets();
-  const target = positiveNumber("targetCya", defaults.cya);
+  const targets = targetsFromInputs();
+  const target = targets.cya;
+  const range = targets.ranges.cya;
   const purity = positiveNumber("stabilizerPurity", 100);
   const unit = concentrationUnitSuffix();
   const stabilizerName = chemicalName("stabilizerName", "stabiliser");
 
-  if (current < target - 5) {
+  if (current < range.min) {
     const delta = target - current;
     cards.push({
       title: "Raise stabiliser",
       badge: "dose",
       amount: formatMass(stabilizerDose(volume, delta, purity)),
       chemical: `${formatNumber(purity, 1)}% ${stabilizerName}`,
-      body: `Raises cyanuric acid by about ${formatNumber(delta, 0)}${unit}.`,
+      body: `Stabiliser is below the acceptable range of ${formatNumber(range.min, 0)}-${formatNumber(range.max, 0)}${unit}. Raises cyanuric acid by about ${formatNumber(delta, 0)}${unit} to the desired ${formatNumber(target, 0)}${unit}.`,
       effect: "Increases stabiliser, which protects chlorine from sunlight but makes high chlorine levels less effective.",
       steps: [
         `Add ${formatMass(stabilizerDose(volume, delta, purity))} ${stabilizerName} slowly.`,
@@ -1128,14 +1286,14 @@ function calculateCya(cards, volume, sanitizer) {
         "Low stabiliser lets sunlight burn off chlorine faster in outdoor pools."
       ]
     });
-  } else if (current > target + 20) {
+  } else if (current > range.max) {
     const fraction = replacementFraction(current, target);
     cards.push({
       title: "Stabiliser is high",
       badge: "watch",
       amount: `${formatDoseNumber(fraction * 100)}%`,
       chemical: "water replacement",
-      body: `Approximate replacement volume: ${formatLitres(volume * fraction)}.`,
+      body: `Stabiliser is above the acceptable range of ${formatNumber(range.min, 0)}-${formatNumber(range.max, 0)}${unit}. Approximate replacement volume: ${formatLitres(volume * fraction)}.`,
       effect: "Dilutes stabiliser; CYA does not evaporate and usually only drops through water replacement or splash-out.",
       steps: [
         `Replace about ${formatLitres(volume * fraction)} and refill.`,
@@ -1150,20 +1308,21 @@ function calculateSalt(cards, volume, sanitizer) {
   const current = numberValue("salt");
   if (current === null || (sanitizer !== "salt" && sanitizer !== "mineral")) return;
 
-  const defaults = currentDefaultTargets();
-  const target = positiveNumber("targetSalt", defaults.salt);
+  const targets = targetsFromInputs();
+  const target = targets.salt;
+  const range = targets.ranges.salt;
   const systemName = sanitizer === "mineral" ? "mineral system" : "salt chlorinator";
   const unit = concentrationUnitSuffix();
   const saltName = chemicalName("saltName", "pool salt");
 
-  if (current < target - 100) {
+  if (current < range.min) {
     const delta = target - current;
     cards.push({
       title: "Salt is low",
       badge: "watch",
       amount: "Check manual",
       chemical: saltName,
-      body: `Salt is about ${formatNumber(delta, 0)}${unit} under target. Confirm the ${systemName} manual before adding salt.`,
+      body: `Salt is below the acceptable range of ${formatNumber(range.min, 0)}-${formatNumber(range.max, 0)}${unit} and about ${formatNumber(delta, 0)}${unit} under the desired target. Confirm the ${systemName} manual before adding salt.`,
       effect: `Increases salinity so the ${systemName} can operate correctly.`,
       steps: [
         "Do not add one large calculated amount from the app.",
@@ -1172,13 +1331,13 @@ function calculateSalt(cards, volume, sanitizer) {
         `Low salt can stop the ${systemName} working properly.`
       ]
     });
-  } else if (current > target + 500) {
+  } else if (current > range.max) {
     cards.push({
       title: "Salt is high",
       badge: "watch",
       amount: "Dilute only",
       chemical: "water replacement",
-      body: `Salt is above target. Confirm the ${systemName} operating range before making changes.`,
+      body: `Salt is above the acceptable range of ${formatNumber(range.min, 0)}-${formatNumber(range.max, 0)}${unit}. Confirm the ${systemName} operating range before making changes.`,
       effect: "Dilutes salinity; salt cannot be chemically removed from the water.",
       steps: [
         "Do not add more salt or mineral product.",
@@ -1364,16 +1523,17 @@ function currentReadingsSnapshot() {
 }
 
 function currentTargetSnapshot() {
-  const defaults = currentDefaultTargets();
+  const targets = targetsFromInputs();
   return {
-    chlorine: positiveNumber("targetChlorine", defaults.chlorine),
-    combined: positiveNumber("targetCombined", defaults.combined),
-    bromine: positiveNumber("targetBromine", defaults.bromine),
-    ph: positiveNumber("targetPh", defaults.ph),
-    alkalinity: positiveNumber("targetAlkalinity", defaults.alkalinity),
-    calcium: positiveNumber("targetCalcium", defaults.calcium),
-    cya: positiveNumber("targetCya", defaults.cya),
-    salt: positiveNumber("targetSalt", defaults.salt)
+    chlorine: targets.chlorine,
+    combined: targets.combined,
+    bromine: targets.bromine,
+    ph: targets.ph,
+    alkalinity: targets.alkalinity,
+    calcium: targets.calcium,
+    cya: targets.cya,
+    salt: targets.salt,
+    ranges: targets.ranges
   };
 }
 

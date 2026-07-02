@@ -280,45 +280,133 @@
             </fieldset>
 
             <div class="form-grid targets-grid">
-              <label class="field target-chlorine">
-                <span>Free chlorine target</span>
-                <input id="targetChlorine" type="number" min="0" step="0.1" value="1.5">
-              </label>
+              <div class="target-range-card target-chlorine">
+                <span class="target-name">Free chlorine</span>
+                <label class="field">
+                  <span>Desired</span>
+                  <input id="targetChlorine" type="number" min="0" step="0.1" value="1.5">
+                </label>
+                <label class="field">
+                  <span>Min ok</span>
+                  <input id="targetChlorineMin" type="number" min="0" step="0.1" value="1">
+                </label>
+                <label class="field">
+                  <span>Max ok</span>
+                  <input id="targetChlorineMax" type="number" min="0" step="0.1" value="5">
+                </label>
+              </div>
 
-              <label class="field target-combined">
-                <span>Combined chlorine action</span>
-                <input id="targetCombined" type="number" min="0" step="0.1" value="1">
-              </label>
+              <div class="target-range-card target-combined">
+                <span class="target-name">Combined chlorine</span>
+                <label class="field">
+                  <span>Desired</span>
+                  <input id="targetCombined" type="number" min="0" step="0.01" value="0.2">
+                </label>
+                <label class="field">
+                  <span>Min ok</span>
+                  <input id="targetCombinedMin" type="number" min="0" step="0.01" value="0">
+                </label>
+                <label class="field">
+                  <span>Max ok</span>
+                  <input id="targetCombinedMax" type="number" min="0" step="0.01" value="1">
+                </label>
+              </div>
 
-              <label class="field target-bromine is-hidden">
-                <span>Bromine target</span>
-                <input id="targetBromine" type="number" min="0" step="0.1" value="4">
-              </label>
+              <div class="target-range-card target-bromine is-hidden">
+                <span class="target-name">Bromine</span>
+                <label class="field">
+                  <span>Desired</span>
+                  <input id="targetBromine" type="number" min="0" step="0.1" value="4">
+                </label>
+                <label class="field">
+                  <span>Min ok</span>
+                  <input id="targetBromineMin" type="number" min="0" step="0.1" value="2">
+                </label>
+                <label class="field">
+                  <span>Max ok</span>
+                  <input id="targetBromineMax" type="number" min="0" step="0.1" value="8">
+                </label>
+              </div>
 
-              <label class="field">
-                <span>pH target</span>
-                <input id="targetPh" type="number" min="0" max="14" step="0.1" value="7.5">
-              </label>
+              <div class="target-range-card">
+                <span class="target-name">pH</span>
+                <label class="field">
+                  <span>Desired</span>
+                  <input id="targetPh" type="number" min="0" max="14" step="0.1" value="7.5">
+                </label>
+                <label class="field">
+                  <span>Min ok</span>
+                  <input id="targetPhMin" type="number" min="0" max="14" step="0.1" value="7.2">
+                </label>
+                <label class="field">
+                  <span>Max ok</span>
+                  <input id="targetPhMax" type="number" min="0" max="14" step="0.1" value="7.8">
+                </label>
+              </div>
 
-              <label class="field">
-                <span>Alkalinity target</span>
-                <input id="targetAlkalinity" type="number" min="0" step="1" value="100">
-              </label>
+              <div class="target-range-card">
+                <span class="target-name">Alkalinity</span>
+                <label class="field">
+                  <span>Desired</span>
+                  <input id="targetAlkalinity" type="number" min="0" step="1" value="100">
+                </label>
+                <label class="field">
+                  <span>Min ok</span>
+                  <input id="targetAlkalinityMin" type="number" min="0" step="1" value="80">
+                </label>
+                <label class="field">
+                  <span>Max ok</span>
+                  <input id="targetAlkalinityMax" type="number" min="0" step="1" value="120">
+                </label>
+              </div>
 
-              <label class="field">
-                <span>Hardness target</span>
-                <input id="targetCalcium" type="number" min="0" step="1" value="250">
-              </label>
+              <div class="target-range-card">
+                <span class="target-name">Hardness</span>
+                <label class="field">
+                  <span>Desired</span>
+                  <input id="targetCalcium" type="number" min="0" step="1" value="250">
+                </label>
+                <label class="field">
+                  <span>Min ok</span>
+                  <input id="targetCalciumMin" type="number" min="0" step="1" value="200">
+                </label>
+                <label class="field">
+                  <span>Max ok</span>
+                  <input id="targetCalciumMax" type="number" min="0" step="1" value="500">
+                </label>
+              </div>
 
-              <label class="field target-cya">
-                <span>Stabiliser target</span>
-                <input id="targetCya" type="number" min="0" step="1" value="30">
-              </label>
+              <div class="target-range-card target-cya">
+                <span class="target-name">Stabiliser</span>
+                <label class="field">
+                  <span>Desired</span>
+                  <input id="targetCya" type="number" min="0" step="1" value="30">
+                </label>
+                <label class="field">
+                  <span>Min ok</span>
+                  <input id="targetCyaMin" type="number" min="0" step="1" value="30">
+                </label>
+                <label class="field">
+                  <span>Max ok</span>
+                  <input id="targetCyaMax" type="number" min="0" step="1" value="50">
+                </label>
+              </div>
 
-              <label class="field target-salt">
-                <span>Salt target</span>
-                <input id="targetSalt" type="number" min="0" step="10" value="4000">
-              </label>
+              <div class="target-range-card target-salt">
+                <span class="target-name">Salt</span>
+                <label class="field">
+                  <span>Desired</span>
+                  <input id="targetSalt" type="number" min="0" step="10" value="4000">
+                </label>
+                <label class="field">
+                  <span>Min ok</span>
+                  <input id="targetSaltMin" type="number" min="0" step="10" value="3000">
+                </label>
+                <label class="field">
+                  <span>Max ok</span>
+                  <input id="targetSaltMax" type="number" min="0" step="10" value="5000">
+                </label>
+              </div>
             </div>
 
             <div class="form-actions">
