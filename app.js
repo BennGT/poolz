@@ -949,7 +949,7 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
         steps: [
           "Follow the alkalinity card first.",
           "Circulate, then retest pH and alkalinity.",
-          "If pH is still low after alkalinity is back in range, aerate first or use a pH increaser in small label-dose stages."
+          "If pH is still low after alkalinity is back in range, aerate first by running the pump, pointing return jets upward to ripple the surface, and turning on water features, spa jets, or an air blower if fitted."
         ]
       });
       return;
@@ -959,13 +959,13 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
       cards.push({
         title: "pH is low",
         badge: "watch",
-        amount: "Aerate",
+        amount: "Aerate pool water",
         chemical: "while lowering alkalinity",
         body: `pH is ${formatNumber(ph, 1)} but alkalinity is high. Avoid pH-up or buffer products for now.`,
         effect: "The alkalinity process uses acid to reduce buffering, then aeration raises pH without adding alkalinity back.",
         steps: [
           "Follow the lower alkalinity card in small stages.",
-          "Aerate strongly between acid stages to bring pH back up.",
+          "Aerate strongly between acid stages: run the pump, point return jets upward, and turn on water features, spa jets, or an air blower if fitted.",
           "Retest pH and alkalinity before adding any pH increaser."
         ]
       });
@@ -975,12 +975,13 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
     cards.push({
       title: "Raise pH",
       badge: "watch",
-      amount: "Aerate first",
+      amount: "Aerate pool water first",
       chemical: "pH increaser if needed",
       body: `pH is ${formatNumber(ph, 1)}. Raise it toward ${formatNumber(target, 1)} without chasing alkalinity at the same time.`,
       effect: "Aeration raises pH without adding chemicals. pH increaser/soda ash raises pH faster but can also raise alkalinity.",
       steps: [
-        "Point returns upward, run water features, or increase aeration with the pump running.",
+        "Run the pump and point return jets upward so the surface ripples.",
+        "Turn on water features, spa jets, fountains, deck jets, or an air blower if fitted.",
         "Retest pH before adding a chemical pH increaser.",
         "Avoid using sodium bicarbonate for pH-only correction unless alkalinity is also low.",
         "Low pH is often from acid overdose, rain/dilution, or low alkalinity."
@@ -1033,7 +1034,7 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
       steps: [
         `Add ${formatMass(bicarbForAlkalinity(volume, delta))} ${alkalinityName} with circulation.`,
         "Retest alkalinity and pH after mixing.",
-        "If pH still needs raising after alkalinity is in range, use aeration first or a pH increaser in small stages.",
+        "If pH still needs raising after alkalinity is in range, aerate first by running the pump, pointing return jets upward, and turning on water features, spa jets, or an air blower if fitted.",
         "Low alkalinity makes pH unstable and is often caused by acid or dilution."
       ]
     });
@@ -1050,7 +1051,7 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
       effect: "Acid lowers total alkalinity and pH. Aeration then raises pH back up without raising alkalinity again.",
       steps: [
         "Add acid in smaller staged doses to lower alkalinity.",
-        "Aerate strongly to raise pH back up without adding buffer.",
+        "Aerate strongly to raise pH back up without adding buffer: run the pump, point return jets upward, and turn on water features, spa jets, or an air blower if fitted.",
         "Retest pH and alkalinity between stages.",
         "High alkalinity usually comes from source water, too much buffer, or pH-up products."
       ],
