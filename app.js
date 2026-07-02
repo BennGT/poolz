@@ -177,6 +177,7 @@ let drawerTouchStartX = null;
 let deferredInstallPrompt = null;
 let lastCards = [];
 let resultsVisible = false;
+let clearReadingsAfterDismiss = false;
 let historyEntries = [];
 
 const $ = (id) => document.getElementById(id);
@@ -894,16 +895,40 @@ function calculate({ showResults = false } = {}) {
     });
   }
 
-  lastCards = cards;
+  lastCards = orderDoseCards(cards);
   if (showResults) {
     resultsVisible = true;
-    renderCards(cards);
+    renderCards(lastCards);
   } else {
     resultsVisible = false;
     renderPendingResults("Readings updated. Press Calculate to show dosing.");
   }
   saveState();
-  return cards;
+  return lastCards;
+}
+
+function doseCardPriority(card) {
+  const title = (card.title || "").toLowerCase();
+
+  if (card.badge === "ok") return 90;
+  if (title.includes("free chlorine is high") || title.includes("total chlorine is high") || title.includes("bromine is high")) return 0;
+  if (title.includes("ph")) return 10;
+  if (title.includes("alkalinity")) return 20;
+  if (title.includes("calcium") || title.includes("hardness")) return 30;
+  if (title.includes("stabiliser")) return 40;
+  if (title.includes("salt")) return 50;
+  if (title.includes("chlorine") || title.includes("bromine")) return 60;
+  return 70;
+}
+
+function orderDoseCards(cards) {
+  return cards
+    .map((card, index) => ({ card, index }))
+    .sort((left, right) => {
+      const priority = doseCardPriority(left.card) - doseCardPriority(right.card);
+      return priority || left.index - right.index;
+    })
+    .map((item) => item.card);
 }
 
 function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
@@ -1070,6 +1095,23 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
   if (ph === null) return;
 
   if (ph > range.max) {
+    if (alkalinity !== null && alkalinity > alkalinityRange.max) {
+      cards.push({
+        title: "pH is high",
+        badge: "watch",
+        amount: "Stage with alkalinity",
+        chemical: "acid dosing",
+        body: `pH is above the acceptable range of ${formatNumber(range.min, 1)}-${formatNumber(range.max, 1)}, and alkalinity is also high. Follow the lower alkalinity card first so you do not double-dose acid.`,
+        effect: "Lowering alkalinity uses acid and aeration cycles, which also corrects high pH in stages.",
+        steps: [
+          "Use the lower alkalinity card as the first treatment step.",
+          "Do not add a separate full pH acid dose at the same time.",
+          "Retest pH and alkalinity between stages before adding more acid."
+        ]
+      });
+      return;
+    }
+
     const drop = ph - target;
     const dryAcid = dryAcidForPh(volume, drop, alkalinity);
     const hydrochloric = hydrochloricForPh(volume, drop, alkalinity, hydrochloricStrength);
@@ -1445,7 +1487,14 @@ function showDoseResults() {
 
 function dismissDoseResults() {
   resultsVisible = false;
-  renderPendingResults("Results dismissed. Press Calculate to show dosing again.");
+  if (clearReadingsAfterDismiss) {
+    clearReadingsAfterDismiss = false;
+    lastCards = [];
+    clearReadings();
+    renderPendingResults("Test log saved. Enter readings for the next test.");
+  } else {
+    renderPendingResults("Results dismissed. Press Calculate to show dosing again.");
+  }
   saveState();
 }
 
@@ -1563,6 +1612,7 @@ function saveTestLog() {
     readings,
     targets: currentTargetSnapshot()
   });
+  clearReadingsAfterDismiss = resultsVisible;
   saveHistory();
 }
 
