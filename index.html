@@ -89,11 +89,11 @@
               <label class="field pool-volume-field">
                 <span>Pool volume</span>
                 <input id="poolVolume" type="number" min="1" step="1" inputmode="decimal" value="50000" placeholder="eg: 50,000 L">
-                <small id="poolVolumeHint">Not sure your pool size? Use the volume calculator below.</small>
+                <small id="poolVolumeHint">Not sure your pool size? Volume calculator below.</small>
               </label>
 
               <div class="volume-link-field">
-                <button class="secondary-button" type="button" data-nav-page="volume">Use volume calculator</button>
+                <button class="secondary-button" type="button" data-nav-page="volume">Volume calculator</button>
               </div>
 
               <fieldset class="segmented unit-segment" aria-label="Pool volume units">
@@ -529,8 +529,7 @@
                   <option value="salt">Salt</option>
                   <option value="waterTemperature">Temperature</option>
                 </select>
-                <button id="exportHistory" class="secondary-button" type="button">Export Excel file</button>
-                <button id="shareHistory" class="secondary-button" type="button">Share / email</button>
+                <button id="shareHistory" class="secondary-button" type="button">Share / email CSV</button>
                 <button id="clearHistory" class="secondary-button" type="button">Clear history</button>
               </div>
             </div>
@@ -561,6 +560,9 @@
             <div class="notes-grid safety-grid">
               <article class="disclaimer-card">
                 <span>Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</span>
+              </article>
+              <article class="warning-note">
+                <span>Before adding chemicals or salt, leave the pump running but turn off heat pumps, heaters, chlorinators, UV sanitisers, ozone systems, mineral systems, and automatic dosing equipment. This protects equipment from concentrated chemical and stops automatic systems reacting while the water is mixing.</span>
               </article>
               <article class="warning-note">
                 <span>Indoor pools often avoid cyanuric acid. Follow local rules and product labels.</span>

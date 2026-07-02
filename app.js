@@ -364,7 +364,7 @@ function poolVolumeInputToLitres() {
 
 function updatePoolVolumeExample() {
   if ($("poolVolume")) $("poolVolume").placeholder = selectedVolumeExample();
-  if ($("poolVolumeHint")) $("poolVolumeHint").textContent = "Not sure your pool size? Use the volume calculator below.";
+  if ($("poolVolumeHint")) $("poolVolumeHint").textContent = "Not sure your pool size? Volume calculator below.";
 }
 
 function formatPoolVolume(litres) {
@@ -895,6 +895,10 @@ function calculate({ showResults = false } = {}) {
     });
   }
 
+  if (needsEquipmentSafety(cards)) {
+    cards.unshift(equipmentSafetyCard());
+  }
+
   lastCards = orderDoseCards(cards);
   if (showResults) {
     resultsVisible = true;
@@ -910,6 +914,7 @@ function calculate({ showResults = false } = {}) {
 function doseCardPriority(card) {
   const title = (card.title || "").toLowerCase();
 
+  if (title.includes("before adding chemicals")) return -10;
   if (card.badge === "ok") return 90;
   if (title.includes("free chlorine is high") || title.includes("total chlorine is high") || title.includes("bromine is high")) return 0;
   if (title.includes("ph")) return 10;
@@ -929,6 +934,40 @@ function orderDoseCards(cards) {
       return priority || left.index - right.index;
     })
     .map((item) => item.card);
+}
+
+function rangeLabel(range, digits = 0, unit = "") {
+  return `${formatNumber(range.min, digits)}-${formatNumber(range.max, digits)}${unit}`;
+}
+
+function okRangeCard(title, value, range, digits, unit, effect) {
+  return {
+    title,
+    badge: "ok",
+    amount: `${formatNumber(value, digits)}${unit}`,
+    chemical: `range ${rangeLabel(range, digits, unit)}`,
+    body: `Current reading is inside the acceptable range of ${rangeLabel(range, digits, unit)}.`,
+    effect
+  };
+}
+
+function equipmentSafetyCard() {
+  return {
+    title: "Before adding chemicals",
+    badge: "watch",
+    amount: "Turn off",
+    chemical: "heaters, chlorinators, UV",
+    body: "Leave the pump running, but turn off heat pumps, heaters, chlorinators, UV sanitisers, ozone systems, mineral systems and automatic dosing equipment before adding chemicals or salt.",
+    effect: "This protects equipment from concentrated chemical and stops automatic systems reacting while the water is mixing.",
+    steps: [
+      "Keep the circulation pump running.",
+      "Turn equipment back on after the chemical has mixed and you have retested if needed."
+    ]
+  };
+}
+
+function needsEquipmentSafety(cards) {
+  return cards.some((card) => card.badge !== "ok" && !["Hold", "Retest", "Balanced"].includes(card.amount));
 }
 
 function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
@@ -977,6 +1016,15 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
           "High chlorine is usually from recent dosing, high output, or low demand."
         ]
       });
+    } else {
+      cards.push(okRangeCard(
+        "Free chlorine ok",
+        free,
+        chlorineRange,
+        1,
+        unit,
+        "Free chlorine is within the saved operating range."
+      ));
     }
   }
 
@@ -1031,8 +1079,8 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
       title: "Combined chlorine pass",
       badge: "ok",
       amount: `${formatTruncatedDecimal(combinedLevel, 2)}${unit}`,
-      chemical: "combined chlorine",
-      body: `Combined chlorine is at or under the acceptable maximum of ${formatTruncatedDecimal(combinedAction, 2)}${unit}.`,
+      chemical: `range ${formatTruncatedDecimal(targets.ranges.combined.min, 2)}-${formatTruncatedDecimal(combinedAction, 2)}${unit}`,
+      body: `Combined chlorine is inside the acceptable range of ${formatTruncatedDecimal(targets.ranges.combined.min, 2)}-${formatTruncatedDecimal(combinedAction, 2)}${unit}.`,
       effect: "Pass for the entered free and total chlorine readings."
     });
   }
@@ -1079,6 +1127,15 @@ function calculateBromine(cards, volume) {
         "High bromine is usually from recent dosing, high feeder output, or low demand."
       ]
     });
+  } else {
+    cards.push(okRangeCard(
+      "Bromine ok",
+      bromine,
+      range,
+      1,
+      unit,
+      "Bromine is within the saved operating range."
+    ));
   }
 }
 
@@ -1184,6 +1241,15 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
         "Low pH is often from acid overdose, rain/dilution, or low alkalinity."
       ]
     });
+  } else {
+    cards.push(okRangeCard(
+      "pH ok",
+      ph,
+      range,
+      1,
+      "",
+      "pH is within the saved acceptable range."
+    ));
   }
 }
 
@@ -1255,6 +1321,15 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
       ],
       alt: [`${dryAcidName} equivalent: ${formatMass(dryAcid)}.`]
     });
+  } else {
+    cards.push(okRangeCard(
+      "Alkalinity ok",
+      current,
+      range,
+      0,
+      unit,
+      "Total alkalinity is within the saved acceptable range."
+    ));
   }
 }
 
@@ -1299,6 +1374,15 @@ function calculateCalcium(cards, volume) {
         "High hardness is usually from hard source water, evaporation, or calcium products."
       ]
     });
+  } else {
+    cards.push(okRangeCard(
+      "Calcium hardness ok",
+      current,
+      range,
+      0,
+      unit,
+      "Calcium hardness is within the saved acceptable range."
+    ));
   }
 }
 
@@ -1343,6 +1427,15 @@ function calculateCya(cards, volume, sanitizer) {
         "High stabiliser usually comes from previous stabiliser or stabilized chlorine use."
       ]
     });
+  } else {
+    cards.push(okRangeCard(
+      "Stabiliser ok",
+      current,
+      range,
+      0,
+      unit,
+      "Stabiliser is within the saved acceptable range."
+    ));
   }
 }
 
@@ -1388,6 +1481,15 @@ function calculateSalt(cards, volume, sanitizer) {
         "High salt usually comes from over-salting, evaporation, or liquid chlorine build-up."
       ]
     });
+  } else {
+    cards.push(okRangeCard(
+      "Salt ok",
+      current,
+      range,
+      0,
+      unit,
+      "Salt is within the saved acceptable range."
+    ));
   }
 }
 
@@ -1796,7 +1898,7 @@ function csvCell(value) {
 }
 
 function historyExportFileName() {
-  return `poolz-history-${new Date().toISOString().slice(0, 10)}.csv`;
+  return `my-pool-pal-history-${new Date().toISOString().slice(0, 10)}.csv`;
 }
 
 function readingExportValue(entry, id) {
@@ -2211,7 +2313,7 @@ function bindEvents() {
   $("calculateButton").addEventListener("click", handleCalculatePress);
   $("saveTestLog").addEventListener("click", saveTestLog);
   $("historyMetric").addEventListener("change", renderHistory);
-  $("exportHistory").addEventListener("click", downloadHistoryExport);
+  if ($("exportHistory")) $("exportHistory").addEventListener("click", downloadHistoryExport);
   $("shareHistory").addEventListener("click", shareHistoryExport);
   $("clearHistory").addEventListener("click", clearHistory);
   if ($("installAppButton")) $("installAppButton").addEventListener("click", promptInstallApp);
