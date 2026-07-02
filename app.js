@@ -1158,10 +1158,10 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
         badge: "watch",
         amount: "Stage with alkalinity",
         chemical: "acid dosing",
-        body: `pH is above the acceptable range of ${formatNumber(range.min, 1)}-${formatNumber(range.max, 1)}, and alkalinity is also high. Follow the lower alkalinity card first so you do not double-dose acid.`,
+        body: `pH is above the acceptable range of ${formatNumber(range.min, 1)}-${formatNumber(range.max, 1)}, and alkalinity is also high. Lower alkalinity first so you do not double-dose acid.`,
         effect: "Lowering alkalinity uses acid and aeration cycles, which also corrects high pH in stages.",
         steps: [
-          "Use the lower alkalinity card as the first treatment step.",
+          "Lower alkalinity first with staged acid and aeration.",
           "Do not add a separate full pH acid dose at the same time.",
           "Retest pH and alkalinity between stages before adding more acid."
         ]
@@ -1201,7 +1201,7 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
         body: `pH is ${formatNumber(ph, 1)} and alkalinity is also low. Raise alkalinity first, because that can gently lift pH too.`,
         effect: "Alkalinity buffers pH. Sodium bicarbonate mainly raises alkalinity and only nudges pH, so retesting avoids double dosing.",
         steps: [
-          "Follow the alkalinity card first.",
+          "Raise alkalinity first.",
           "Circulate, then retest pH and alkalinity.",
           "If pH is still low after alkalinity is back in range, aerate first by running the pump, pointing return jets upward to ripple the surface, and turning on water features, spa jets, or an air blower if fitted."
         ]
@@ -1218,7 +1218,7 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
         body: `pH is ${formatNumber(ph, 1)} but alkalinity is high. Avoid pH-up or buffer products for now.`,
         effect: "The alkalinity process uses acid to reduce buffering, then aeration raises pH without adding alkalinity back.",
         steps: [
-          "Follow the lower alkalinity card in small stages.",
+          "Lower alkalinity first in small staged acid and aeration steps.",
           "Aerate strongly between acid stages: run the pump, point return jets upward, and turn on water features, spa jets, or an air blower if fitted.",
           "Retest pH and alkalinity before adding any pH increaser."
         ]
@@ -1281,7 +1281,7 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
         body: `Alkalinity is ${formatNumber(current, 0)}${unit}, but pH is high. Lower pH carefully first, then retest before raising alkalinity.`,
         effect: "Bicarbonate raises alkalinity but can push pH upward, so adding it while pH is already high can make the pH problem worse.",
         steps: [
-          "Use the pH card first and keep the acid dose staged.",
+          "Lower pH first with staged acid dosing.",
           "Circulate and retest pH and alkalinity.",
           "Only add alkalinity increaser after pH is back near target."
         ]
