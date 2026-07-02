@@ -1702,8 +1702,8 @@ async function shareHistoryExport() {
 
   if (file && navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
     await navigator.share({
-      title: "Pool Pal history",
-      text: "Pool Pal history export",
+      title: "My Pool Pal history",
+      text: "My Pool Pal history export",
       files: [file]
     }).catch(() => null);
     return;
@@ -1711,13 +1711,13 @@ async function shareHistoryExport() {
 
   if (navigator.share) {
     await navigator.share({
-      title: "Pool Pal history",
+      title: "My Pool Pal history",
       text: historyCsvContent()
     }).catch(() => null);
     return;
   }
 
-  const subject = encodeURIComponent("Pool Pal history export");
+  const subject = encodeURIComponent("My Pool Pal history export");
   const body = encodeURIComponent(historyCsvContent());
   window.location.href = `mailto:?subject=${subject}&body=${body}`;
 }
@@ -1791,7 +1791,7 @@ function updateInstallState(message) {
   }
 
   if (button) button.disabled = true;
-  if (status) status.textContent = message || "Install Pool Pal on mobile now. App Store and Play Store releases are planned.";
+  if (status) status.textContent = message || "Install My Pool Pal on mobile now. App Store and Play Store releases are planned.";
 }
 
 async function promptInstallApp() {
@@ -1810,20 +1810,20 @@ const installGuides = {
   ios: {
     title: "iPhone / iPad",
     steps: [
-      "Open Pool Pal in Safari on your iPhone or iPad.",
+      "Open My Pool Pal in Safari on your iPhone or iPad.",
       "Tap the Share button.",
       "Choose Add to Home Screen.",
-      "Tap Add. Pool Pal will open from your home screen.",
+      "Tap Add. My Pool Pal will open from your home screen.",
       "An App Store version is planned later."
     ]
   },
   android: {
     title: "Android",
     steps: [
-      "Open Pool Pal in Chrome on your Android phone or tablet.",
+      "Open My Pool Pal in Chrome on your Android phone or tablet.",
       "Tap the browser menu.",
       "Choose Install app or Add to Home screen.",
-      "Confirm the install. Pool Pal will open from your home screen.",
+      "Confirm the install. My Pool Pal will open from your home screen.",
       "A Play Store version is planned later."
     ]
   }
@@ -2053,7 +2053,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260702-pool-pal-logo", {
+    navigator.serviceWorker.register("service-worker.js?v=20260702-my-pool-pal-logo", {
       updateViaCache: "none"
     }).catch(() => {});
   });
