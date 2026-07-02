@@ -1,4 +1,4 @@
-# POOLZ
+# Pool Pal
 
 A clean consumer version of the pool chemical dose calculator.
 
@@ -18,8 +18,8 @@ This version is separate from the Rock N Water build in the sibling `RNW Poolz` 
 
 ## Logo
 
-The current POOLZ build uses the supplied POOLZ logo, generated app icons from that artwork, and a blue wave visual theme.
+The current Pool Pal build uses the supplied Pool Pal logo, generated app icons from that artwork, and a blue wave visual theme.
 
 ## Store Launch Note
 
-For Play Store and iOS App Store release, this web app can later be wrapped with Capacitor or another native shell. The app store build should use final POOLZ icons, splash screens, app IDs, privacy text, and store metadata.
+For Play Store and iOS App Store release, this web app can be wrapped with Capacitor or another native shell. The app store build should use final Pool Pal icons, splash screens, app IDs, privacy text, and store metadata.
