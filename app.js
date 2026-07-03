@@ -179,6 +179,8 @@ let lastCards = [];
 let resultsVisible = false;
 let clearReadingsAfterDismiss = false;
 let historyEntries = [];
+let customChemicals = [];
+let customChemicalCounter = 0;
 
 const $ = (id) => document.getElementById(id);
 const all = (selector) => Array.from(document.querySelectorAll(selector));
@@ -222,6 +224,7 @@ function renderProfileOptions(selectedKey = currentPoolKey()) {
   }
 
   if ($("deleteProfile")) $("deleteProfile").disabled = profileCount() <= 1;
+  updateProfileActionLabels();
 }
 
 function selected(name) {
@@ -287,6 +290,108 @@ function chemicalName(id, fallback) {
   const input = $(id);
   const value = input ? input.value.trim() : "";
   return value || fallback;
+}
+
+function customChemicalHasContent(item) {
+  return Boolean((item.name || "").trim() || (item.strength || "").trim());
+}
+
+function makeCustomChemical(item = {}) {
+  return {
+    id: item.id || `custom-${Date.now().toString(36)}-${customChemicalCounter++}`,
+    name: item.name || "",
+    strength: item.strength || ""
+  };
+}
+
+function normalizeCustomChemicals(items) {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map(makeCustomChemical)
+    .filter(customChemicalHasContent);
+}
+
+function syncCustomChemicalsFromDom() {
+  const list = $("customChemicalsList");
+  if (!list) return;
+
+  customChemicals = all("[data-custom-chemical-id]").map((row) => ({
+    id: row.dataset.customChemicalId,
+    name: row.querySelector('[data-custom-chemical-field="name"]').value,
+    strength: row.querySelector('[data-custom-chemical-field="strength"]').value
+  }));
+}
+
+function renderCustomChemicals() {
+  const list = $("customChemicalsList");
+  if (!list) return;
+
+  list.replaceChildren();
+
+  if (!customChemicals.length) {
+    const empty = document.createElement("article");
+    empty.className = "custom-chemicals-empty";
+    empty.textContent = "No custom chemicals added.";
+    list.append(empty);
+    return;
+  }
+
+  customChemicals.forEach((item) => {
+    const chemical = makeCustomChemical(item);
+    const row = document.createElement("article");
+    row.className = "custom-chemical-row";
+    row.dataset.customChemicalId = chemical.id;
+
+    const nameLabel = document.createElement("label");
+    nameLabel.className = "field";
+    const nameText = document.createElement("span");
+    nameText.textContent = "Chemical name";
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.value = chemical.name;
+    nameInput.autocomplete = "off";
+    nameInput.dataset.customChemicalField = "name";
+    nameLabel.append(nameText, nameInput);
+
+    const strengthLabel = document.createElement("label");
+    strengthLabel.className = "field";
+    const strengthText = document.createElement("span");
+    strengthText.textContent = "Strength";
+    const strengthInput = document.createElement("input");
+    strengthInput.type = "text";
+    strengthInput.value = chemical.strength;
+    strengthInput.placeholder = "eg: 985 g/kg or 12.5%";
+    strengthInput.autocomplete = "off";
+    strengthInput.dataset.customChemicalField = "strength";
+    strengthLabel.append(strengthText, strengthInput);
+
+    const removeButton = document.createElement("button");
+    removeButton.className = "secondary-button";
+    removeButton.type = "button";
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener("click", () => {
+      syncCustomChemicalsFromDom();
+      customChemicals = customChemicals.filter((custom) => custom.id !== chemical.id);
+      renderCustomChemicals();
+      saveState();
+    });
+
+    [nameInput, strengthInput].forEach((input) => {
+      input.addEventListener("input", syncCustomChemicalsFromDom);
+      input.addEventListener("change", saveState);
+    });
+
+    row.append(nameLabel, strengthLabel, removeButton);
+    list.append(row);
+  });
+}
+
+function addCustomChemical() {
+  syncCustomChemicalsFromDom();
+  customChemicals.push(makeCustomChemical());
+  renderCustomChemicals();
+  const lastName = $("customChemicalsList").querySelector(".custom-chemical-row:last-child input");
+  if (lastName) lastName.focus();
 }
 
 function currentPoolKey() {
@@ -758,6 +863,7 @@ function applyPoolProfile(key = currentPoolKey()) {
   setTargetInputs(settings.targets || currentDefaultTargets());
   lastPoolKey = key;
   updateVisibility();
+  updateProfileActionLabels();
   calculate();
 }
 
@@ -783,6 +889,7 @@ function updateVisibility() {
 }
 
 function saveState() {
+  syncCustomChemicalsFromDom();
   savePoolSettings();
   const state = {
     activePool: currentPoolKey(),
@@ -790,6 +897,7 @@ function saveState() {
     unitSystem: currentUnitSystem(),
     concentrationUnit: selected("concentrationUnit"),
     profiles: profileSettings,
+    customChemicals: customChemicals.filter(customChemicalHasContent),
     values: {}
   };
 
@@ -805,8 +913,10 @@ function loadState() {
 
   if (!raw) {
     profileSettings = makeDefaultProfileSettings();
+    customChemicals = [];
     renderProfileOptions(defaultProfileKey);
     applyPoolProfile(defaultProfileKey);
+    renderCustomChemicals();
     calculate();
     return;
   }
@@ -817,6 +927,7 @@ function loadState() {
       ...makeDefaultProfileSettings(),
       ...(state.profiles || state.profileSettings || {})
     };
+    customChemicals = normalizeCustomChemicals(state.customChemicals);
 
     const activePool = profileSettings[state.activePool] ? state.activePool : Object.keys(profileSettings)[0] || defaultProfileKey;
     renderProfileOptions(activePool);
@@ -834,12 +945,15 @@ function loadState() {
       if (readingIds.includes(id)) return;
       setValue(id, value);
     });
+    renderCustomChemicals();
   } catch {
     localStorage.removeItem(storageKey);
     profileSettings = makeDefaultProfileSettings();
+    customChemicals = [];
     renderProfileOptions(defaultProfileKey);
     setValue("poolProfile", defaultProfileKey);
     applyPoolProfile(defaultProfileKey);
+    renderCustomChemicals();
   }
 
   updateVisibility();
@@ -2039,17 +2153,39 @@ function createProfileKey() {
   return `pool-${Date.now().toString(36)}`;
 }
 
-function newProfile() {
-  savePoolSettings(currentPoolKey());
-  const key = createProfileKey();
-  profileSettings[key] = {
+function draftProfileDefaults() {
+  return {
     name: "New Pool",
     volume: null,
     sanitizer: "chlorine",
     surface: "fibreglass",
     allowCya: true,
+    draft: true,
     targets: defaultTargetsFor("fibreglass", "chlorine", true)
   };
+}
+
+function updateProfileActionLabels() {
+  const button = $("newProfile");
+  if (!button) return;
+  const profile = profileSettings[currentPoolKey()];
+  button.textContent = profile && profile.draft ? "Clear" : "New pool";
+}
+
+function newProfile() {
+  savePoolSettings(currentPoolKey());
+
+  if (profileSettings[currentPoolKey()] && profileSettings[currentPoolKey()].draft) {
+    profileSettings[currentPoolKey()] = draftProfileDefaults();
+    applyPoolProfile(currentPoolKey());
+    clearReadings();
+    saveState();
+    calculate();
+    return;
+  }
+
+  const key = createProfileKey();
+  profileSettings[key] = draftProfileDefaults();
   renderProfileOptions(key);
   applyPoolProfile(key);
   clearReadings();
@@ -2060,6 +2196,7 @@ function newProfile() {
 function saveCurrentProfile() {
   const key = currentPoolKey();
   savePoolSettings(key);
+  if (profileSettings[key]) profileSettings[key].draft = false;
   renderProfileOptions(key);
   applyPoolProfile(key);
   saveState();
@@ -2302,11 +2439,13 @@ function bindEvents() {
   if ($("newProfile")) $("newProfile").addEventListener("click", newProfile);
   if ($("saveProfile")) $("saveProfile").addEventListener("click", saveCurrentProfile);
   if ($("deleteProfile")) $("deleteProfile").addEventListener("click", deleteCurrentProfile);
+  if ($("addCustomChemical")) $("addCustomChemical").addEventListener("click", addCustomChemical);
   $("saveTargets").addEventListener("click", () => {
     saveState();
     showPage("calculator");
   });
   $("saveChemicals").addEventListener("click", () => {
+    syncCustomChemicalsFromDom();
     saveState();
     showPage("calculator");
   });
@@ -2366,7 +2505,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260703-home", {
+    navigator.serviceWorker.register("service-worker.js?v=20260703-custom-chemicals", {
       updateViaCache: "none"
     }).catch(() => {});
   });

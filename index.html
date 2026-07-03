@@ -10,17 +10,17 @@
     <meta name="application-name" content="My Pool Pal">
     <meta name="description" content="My Pool Pal pool chemistry and dosing calculator.">
     <title>My Pool Pal</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260703-home">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260703-home">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260703-home">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260703-home">
-    <link rel="stylesheet" href="styles.css?v=20260703-home">
-    <script defer src="app.js?v=20260703-home"></script>
+    <link rel="manifest" href="manifest.webmanifest?v=20260703-custom-chemicals">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260703-custom-chemicals">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260703-custom-chemicals">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260703-custom-chemicals">
+    <link rel="stylesheet" href="styles.css?v=20260703-custom-chemicals">
+    <script defer src="app.js?v=20260703-custom-chemicals"></script>
   </head>
   <body>
     <div id="mobileSplash" class="mobile-splash" aria-hidden="true">
       <div class="mobile-splash-content">
-        <img src="assets/poolz-logo.png?v=20260703-home" alt="">
+        <img src="assets/poolz-logo.png?v=20260703-custom-chemicals" alt="">
         <div>
           <p>Use your preferred testing method, enter your water readings, and receive instant chemical dosing recommendations</p>
           <p class="disclaimer-text">Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</p>
@@ -37,7 +37,7 @@
         </button>
 
         <div class="brand">
-          <img class="brand-logo" src="assets/poolz-logo.png?v=20260703-home" alt="My Pool Pal">
+          <img class="brand-logo" src="assets/poolz-logo.png?v=20260703-custom-chemicals" alt="My Pool Pal">
           <h1>My Pool Pal</h1>
         </div>
       </div>
@@ -65,9 +65,8 @@
 
       <section id="page-home" class="app-page is-active" data-page-panel="home">
         <div class="home-page">
-          <section class="home-intro" aria-labelledby="homeTitle">
+          <section class="home-intro">
             <div>
-              <h2 id="homeTitle">Choose a section</h2>
               <p>Use your preferred testing method, enter your water readings, and receive instant chemical dosing recommendations</p>
             </div>
           </section>
@@ -76,14 +75,17 @@
             <button class="home-nav-card" type="button" data-nav-page="calculator">
               <span class="home-icon" aria-hidden="true">
                 <svg viewBox="0 0 48 48" focusable="false">
-                  <path d="M18 7h12"></path>
-                  <path d="M21 7v11L12 34a6 6 0 0 0 5.2 9h13.6a6 6 0 0 0 5.2-9L27 18V7"></path>
-                  <path d="M16 32h16"></path>
-                  <path d="M20 37h8"></path>
+                  <rect x="12" y="6" width="24" height="36" rx="5"></rect>
+                  <path d="M17 13h14v7H17z"></path>
+                  <circle cx="18.5" cy="27" r="1.5"></circle>
+                  <circle cx="24" cy="27" r="1.5"></circle>
+                  <circle cx="29.5" cy="27" r="1.5"></circle>
+                  <circle cx="18.5" cy="33.5" r="1.5"></circle>
+                  <circle cx="24" cy="33.5" r="1.5"></circle>
+                  <circle cx="29.5" cy="33.5" r="1.5"></circle>
                 </svg>
               </span>
               <strong>Chemical calculator</strong>
-              <span>Test readings and dosing results</span>
             </button>
 
             <button class="home-nav-card" type="button" data-nav-page="pools">
@@ -96,7 +98,6 @@
                 </svg>
               </span>
               <strong>My Pool</strong>
-              <span>Profiles, volume, surface, and sanitiser</span>
             </button>
 
             <button class="home-nav-card" type="button" data-nav-page="volume">
@@ -111,7 +112,6 @@
                 </svg>
               </span>
               <strong>Volume calculator</strong>
-              <span>Pool and spa water volume</span>
             </button>
 
             <button class="home-nav-card" type="button" data-nav-page="targets">
@@ -126,7 +126,6 @@
                 </svg>
               </span>
               <strong>Edit targets</strong>
-              <span>Desired levels and acceptable ranges</span>
             </button>
 
             <button class="home-nav-card" type="button" data-nav-page="chemicals">
@@ -140,7 +139,6 @@
                 </svg>
               </span>
               <strong>Edit chemicals</strong>
-              <span>Product names and strengths</span>
             </button>
 
             <button class="home-nav-card" type="button" data-nav-page="history">
@@ -155,7 +153,6 @@
                 </svg>
               </span>
               <strong>History</strong>
-              <span>Saved tests and trends</span>
             </button>
 
             <button class="home-nav-card" type="button" data-nav-page="safety">
@@ -166,7 +163,6 @@
                 </svg>
               </span>
               <strong>Safety</strong>
-              <span>Chemical handling reminders</span>
             </button>
           </nav>
         </div>
@@ -178,7 +174,6 @@
             <div class="section-title">
               <div>
                 <h2>My Pool</h2>
-                <span>Create and save pool profiles with the name, volume, surface, sanitiser, and units.</span>
               </div>
             </div>
 
@@ -202,7 +197,7 @@
               </label>
 
               <div class="volume-link-field">
-                <button class="secondary-button" type="button" data-nav-page="volume">Volume calculator</button>
+                <button class="secondary-button light-blue-button" type="button" data-nav-page="volume">Volume calculator</button>
               </div>
 
               <fieldset class="segmented unit-segment" aria-label="Pool volume units">
@@ -244,7 +239,6 @@
             <section class="panel">
               <div class="page-guide calculator-guide">
                 <p>Use your preferred testing method, enter your water readings, and receive instant chemical dosing recommendations</p>
-                <p class="disclaimer-text">Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</p>
               </div>
 
               <div class="section-title test-results-title">
@@ -324,6 +318,7 @@
 
           </aside>
         </div>
+        <p class="page-bottom-disclaimer disclaimer-text">Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</p>
       </section>
 
       <section id="page-volume" class="app-page" data-page-panel="volume">
@@ -531,7 +526,7 @@
             <div class="section-title">
               <div>
                 <h2>Edit Chemicals</h2>
-                <span>Enter the product names and strengths you use so doses match your supplies.</span>
+                <span>Enter the product names and strengths you use so dosing recommendations match your supplies.</span>
               </div>
             </div>
 
@@ -612,6 +607,14 @@
               </label>
             </div>
 
+            <section class="custom-chemicals" aria-labelledby="customChemicalsTitle">
+              <div class="custom-chemicals-head">
+                <h3 id="customChemicalsTitle">Custom chemicals</h3>
+                <button id="addCustomChemical" class="secondary-button light-blue-button" type="button">Add chemical</button>
+              </div>
+              <div id="customChemicalsList" class="custom-chemicals-list"></div>
+            </section>
+
             <div class="form-actions">
               <button id="saveChemicals" class="primary-button" type="button">Save chemicals</button>
             </div>
@@ -667,9 +670,6 @@
             </div>
 
             <div class="notes-grid safety-grid">
-              <article class="disclaimer-card">
-                <span>Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</span>
-              </article>
               <article class="warning-note">
                 <span>Before adding chemicals or salt, leave the pump running but turn off heat pumps, heaters, chlorinators, UV sanitisers, ozone systems, mineral systems, and automatic dosing equipment. This protects equipment from concentrated chemical and stops automatic systems reacting while the water is mixing.</span>
               </article>
@@ -687,6 +687,9 @@
               </article>
               <article>
                 <span>Retest before redosing, especially after acid, chlorine or large corrections.</span>
+              </article>
+              <article class="disclaimer-card">
+                <span>Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</span>
               </article>
             </div>
           </section>
