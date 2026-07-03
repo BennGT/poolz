@@ -13,6 +13,7 @@ const poolDefaults = {
 
 const storageKey = "poolz-calculator-v1";
 const historyKey = "poolz-history-v1";
+const splashMutedKey = "my-pool-pal-splash-muted";
 
 const valueIds = [
   "poolVolume",
@@ -2299,10 +2300,26 @@ function showInstallGuide(platform) {
   container.replaceChildren(title, list);
 }
 
+function readSplashMuted() {
+  try {
+    return localStorage.getItem(splashMutedKey) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function saveSplashMuted(muted) {
+  try {
+    localStorage.setItem(splashMutedKey, muted ? "true" : "false");
+  } catch {}
+}
+
 function startMobileSplash() {
   const splash = $("mobileSplash");
   if (!splash) return;
   const splashSound = $("splashSound");
+  const splashMute = $("splashMute");
+  let splashMuted = readSplashMuted();
 
   const isMobile = typeof window !== "undefined"
     && window.matchMedia
@@ -2313,21 +2330,57 @@ function startMobileSplash() {
     return;
   }
 
+  const updateSplashMuteButton = () => {
+    if (!splashMute) return;
+    splashMute.classList.toggle("is-muted", splashMuted);
+    splashMute.setAttribute("aria-pressed", splashMuted ? "true" : "false");
+    splashMute.setAttribute("aria-label", splashMuted ? "Enable splash sound" : "Mute splash sound");
+  };
+
   const hideSplash = () => {
     splash.classList.add("is-hidden");
     window.setTimeout(() => splash.remove(), 2200);
   };
 
   const playSplashSound = () => {
-    if (!splashSound) return;
+    if (!splashSound || splashMuted) return;
+    splashSound.muted = false;
     splashSound.volume = 0.55;
     splashSound.currentTime = 0;
     splashSound.play().catch(() => null);
   };
 
+  const setSplashMuted = (muted) => {
+    splashMuted = muted;
+    saveSplashMuted(splashMuted);
+    updateSplashMuteButton();
+    if (splashSound) {
+      splashSound.muted = splashMuted;
+      if (splashMuted) {
+        splashSound.pause();
+        splashSound.currentTime = 0;
+      }
+    }
+  };
+
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  updateSplashMuteButton();
+  if (splashSound) splashSound.muted = splashMuted;
+  if (splashMute) {
+    splashMute.addEventListener("pointerdown", (event) => event.stopPropagation());
+    splashMute.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setSplashMuted(!splashMuted);
+      if (!splashMuted) playSplashSound();
+    });
+  }
   window.setTimeout(playSplashSound, reducedMotion ? 0 : 120);
-  splash.addEventListener("pointerdown", playSplashSound, { once: true });
+  const splashPointerFallback = () => {
+    playSplashSound();
+    splash.removeEventListener("pointerdown", splashPointerFallback);
+  };
+  splash.addEventListener("pointerdown", splashPointerFallback);
   window.setTimeout(hideSplash, reducedMotion ? 700 : 1800);
   splash.addEventListener("click", hideSplash, { once: true });
 }
@@ -2515,7 +2568,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260703-splash-audio", {
+    navigator.serviceWorker.register("service-worker.js?v=20260703-splash-mute", {
       updateViaCache: "none"
     }).catch(() => {});
   });

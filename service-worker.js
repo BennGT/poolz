@@ -1,5 +1,5 @@
-const CACHE_NAME = "my-pool-pal-dose-v34";
-const ASSET_VERSION = "20260703-splash-audio";
+const CACHE_NAME = "my-pool-pal-dose-v35";
+const ASSET_VERSION = "20260703-splash-mute";
 const APP_SHELL = [
   "./",
   "./index.html",
