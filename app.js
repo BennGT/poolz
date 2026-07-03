@@ -2302,6 +2302,7 @@ function showInstallGuide(platform) {
 function startMobileSplash() {
   const splash = $("mobileSplash");
   if (!splash) return;
+  const splashSound = $("splashSound");
 
   const isMobile = typeof window !== "undefined"
     && window.matchMedia
@@ -2314,10 +2315,19 @@ function startMobileSplash() {
 
   const hideSplash = () => {
     splash.classList.add("is-hidden");
-    window.setTimeout(() => splash.remove(), 480);
+    window.setTimeout(() => splash.remove(), 2200);
+  };
+
+  const playSplashSound = () => {
+    if (!splashSound) return;
+    splashSound.volume = 0.55;
+    splashSound.currentTime = 0;
+    splashSound.play().catch(() => null);
   };
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.setTimeout(playSplashSound, reducedMotion ? 0 : 120);
+  splash.addEventListener("pointerdown", playSplashSound, { once: true });
   window.setTimeout(hideSplash, reducedMotion ? 700 : 1800);
   splash.addEventListener("click", hideSplash, { once: true });
 }
@@ -2505,7 +2515,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260703-custom-chemicals", {
+    navigator.serviceWorker.register("service-worker.js?v=20260703-splash-audio", {
       updateViaCache: "none"
     }).catch(() => {});
   });

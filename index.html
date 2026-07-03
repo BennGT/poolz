@@ -10,21 +10,22 @@
     <meta name="application-name" content="My Pool Pal">
     <meta name="description" content="My Pool Pal pool chemistry and dosing calculator.">
     <title>My Pool Pal</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260703-custom-chemicals">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260703-custom-chemicals">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260703-custom-chemicals">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260703-custom-chemicals">
-    <link rel="stylesheet" href="styles.css?v=20260703-custom-chemicals">
-    <script defer src="app.js?v=20260703-custom-chemicals"></script>
+    <link rel="manifest" href="manifest.webmanifest?v=20260703-splash-audio">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260703-splash-audio">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260703-splash-audio">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260703-splash-audio">
+    <link rel="stylesheet" href="styles.css?v=20260703-splash-audio">
+    <script defer src="app.js?v=20260703-splash-audio"></script>
   </head>
   <body>
     <div id="mobileSplash" class="mobile-splash" aria-hidden="true">
       <div class="mobile-splash-content">
-        <img src="assets/poolz-logo.png?v=20260703-custom-chemicals" alt="">
+        <img src="assets/poolz-logo.png?v=20260703-splash-audio" alt="">
         <div>
           <p>Use your preferred testing method, enter your water readings, and receive instant chemical dosing recommendations</p>
           <p class="disclaimer-text">Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</p>
         </div>
+        <audio id="splashSound" preload="auto" src="assets/splash.mp3?v=20260703-splash-audio"></audio>
       </div>
     </div>
 
@@ -37,7 +38,7 @@
         </button>
 
         <div class="brand">
-          <img class="brand-logo" src="assets/poolz-logo.png?v=20260703-custom-chemicals" alt="My Pool Pal">
+          <img class="brand-logo" src="assets/poolz-logo.png?v=20260703-splash-audio" alt="My Pool Pal">
           <h1>My Pool Pal</h1>
         </div>
       </div>
@@ -243,7 +244,7 @@
 
               <div class="section-title test-results-title">
                 <div>
-                  <h2>Test Results</h2>
+                  <h2>Enter test results</h2>
                   <span id="activePoolName">My Pool</span>
                 </div>
               </div>
