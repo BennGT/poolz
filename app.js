@@ -24,7 +24,6 @@ const valueIds = [
   "alkalinity",
   "calcium",
   "cya",
-  "salt",
   "waterTemperature",
   "targetChlorine",
   "targetChlorineMin",
@@ -47,9 +46,6 @@ const valueIds = [
   "targetCya",
   "targetCyaMin",
   "targetCyaMax",
-  "targetSalt",
-  "targetSaltMin",
-  "targetSaltMax",
   "liquidChlorineName",
   "liquidChlorineStrength",
   "granularChlorineName",
@@ -63,8 +59,7 @@ const valueIds = [
   "calciumName",
   "calciumPurity",
   "stabilizerName",
-  "stabilizerPurity",
-  "saltName"
+  "stabilizerPurity"
 ];
 
 const readingIds = [
@@ -76,7 +71,6 @@ const readingIds = [
   "alkalinity",
   "calcium",
   "cya",
-  "salt",
   "waterTemperature"
 ];
 
@@ -87,8 +81,7 @@ const targetDesiredIds = [
   "targetPh",
   "targetAlkalinity",
   "targetCalcium",
-  "targetCya",
-  "targetSalt"
+  "targetCya"
 ];
 
 const targetRangeIds = [
@@ -105,9 +98,7 @@ const targetRangeIds = [
   "targetCalciumMin",
   "targetCalciumMax",
   "targetCyaMin",
-  "targetCyaMax",
-  "targetSaltMin",
-  "targetSaltMax"
+  "targetCyaMax"
 ];
 
 const targetIds = [...targetDesiredIds, ...targetRangeIds];
@@ -119,8 +110,7 @@ const targetFieldMap = {
   targetPh: "ph",
   targetAlkalinity: "alkalinity",
   targetCalcium: "calcium",
-  targetCya: "cya",
-  targetSalt: "salt"
+  targetCya: "cya"
 };
 
 const targetRangeFieldMap = {
@@ -130,8 +120,7 @@ const targetRangeFieldMap = {
   ph: { min: "targetPhMin", max: "targetPhMax" },
   alkalinity: { min: "targetAlkalinityMin", max: "targetAlkalinityMax" },
   calcium: { min: "targetCalciumMin", max: "targetCalciumMax" },
-  cya: { min: "targetCyaMin", max: "targetCyaMax" },
-  salt: { min: "targetSaltMin", max: "targetSaltMax" }
+  cya: { min: "targetCyaMin", max: "targetCyaMax" }
 };
 
 const surfaceTargetDefaults = {
@@ -192,11 +181,11 @@ function makeDefaultProfileSettings() {
       key,
       {
         name: profile.name,
-        sanitizer: profile.sanitizer,
+        sanitizer: normalizedSanitizer(profile.sanitizer),
         surface: profile.surface,
         volume: profile.volume,
         allowCya: profile.allowCya,
-        targets: defaultTargetsFor(profile.surface, profile.sanitizer, profile.allowCya)
+        targets: defaultTargetsFor(profile.surface, normalizedSanitizer(profile.sanitizer), profile.allowCya)
       }
     ])
   );
@@ -239,6 +228,11 @@ function setRadio(name, value) {
 
 function normalizedSurface(value) {
   return value === "plaster" || value === "render" ? "concrete" : value;
+}
+
+function normalizedSanitizer(value) {
+  if (value === "salt") return "chlorine";
+  return ["chlorine", "mineral", "bromine"].includes(value) ? value : "chlorine";
 }
 
 function numberValue(id) {
@@ -413,15 +407,6 @@ function currentPoolVolumeLitres(key = currentPoolKey()) {
 
 function activePoolAllowsCya() {
   return Boolean(currentPool().allowCya && selected("sanitizer") !== "bromine");
-}
-
-function isSaltPool() {
-  return selected("sanitizer") === "salt";
-}
-
-function usesSaltReading() {
-  const sanitizer = selected("sanitizer");
-  return sanitizer === "salt" || sanitizer === "mineral";
 }
 
 function currentUnitSystem() {
@@ -679,6 +664,7 @@ function clamp(value, min, max) {
 }
 
 function defaultTargetsFor(surface, sanitizer, cyaAllowed) {
+  sanitizer = normalizedSanitizer(sanitizer);
   const surfaceDefaults = surfaceTargetDefaults[normalizedSurface(surface)] || surfaceTargetDefaults.fibreglass;
 
   let targets;
@@ -691,19 +677,17 @@ function defaultTargetsFor(surface, sanitizer, cyaAllowed) {
       ph: Math.max(surfaceDefaults.ph, 7.6),
       alkalinity: surfaceDefaults.alkalinity,
       calcium: surfaceDefaults.calcium,
-      cya: 0,
-      salt: 0
+      cya: 0
     };
   } else {
     targets = {
-      chlorine: sanitizer === "salt" || sanitizer === "mineral" || cyaAllowed ? 2 : 1.5,
+      chlorine: sanitizer === "mineral" || cyaAllowed ? 2 : 1.5,
       combined: 0.2,
       bromine: 4,
       ph: surfaceDefaults.ph,
       alkalinity: surfaceDefaults.alkalinity,
       calcium: surfaceDefaults.calcium,
-      cya: cyaAllowed ? 30 : 0,
-      salt: sanitizer === "salt" || sanitizer === "mineral" ? 4000 : 0
+      cya: cyaAllowed ? 30 : 0
     };
   }
 
@@ -715,7 +699,6 @@ function defaultTargetsFor(surface, sanitizer, cyaAllowed) {
 
 function defaultTargetRangesFor(surface, sanitizer, cyaAllowed, targets) {
   const surfaceRanges = surfaceTargetRangeDefaults[normalizedSurface(surface)] || surfaceTargetRangeDefaults.fibreglass;
-  const usesSalt = sanitizer === "salt" || sanitizer === "mineral";
   const ranges = {
     chlorine: { min: 1, max: 5 },
     combined: { min: 0, max: 1 },
@@ -723,8 +706,7 @@ function defaultTargetRangesFor(surface, sanitizer, cyaAllowed, targets) {
     ph: surfaceRanges.ph,
     alkalinity: surfaceRanges.alkalinity,
     calcium: surfaceRanges.calcium,
-    cya: cyaAllowed ? { min: 30, max: 50 } : { min: 0, max: 0 },
-    salt: usesSalt ? { min: 3000, max: 5000 } : { min: 0, max: 0 }
+    cya: cyaAllowed ? { min: 30, max: 50 } : { min: 0, max: 0 }
   };
 
   return normalizeTargetRanges(ranges, ranges, targets);
@@ -819,7 +801,6 @@ function setTargetInputs(targets) {
   setValue("targetAlkalinity", values.alkalinity);
   setValue("targetCalcium", values.calcium);
   setValue("targetCya", values.cya);
-  setValue("targetSalt", values.salt);
   Object.entries(targetRangeFieldMap).forEach(([key, ids]) => {
     const range = values.ranges[key];
     setValue(ids.min, range.min);
@@ -842,7 +823,7 @@ function savePoolSettings(key = currentPoolKey()) {
   profileSettings[key] = {
     ...existing,
     name,
-    sanitizer: selected("sanitizer"),
+    sanitizer: normalizedSanitizer(selected("sanitizer")),
     surface,
     volume,
     allowCya: true,
@@ -860,7 +841,7 @@ function applyPoolProfile(key = currentPoolKey()) {
   if ($("activePoolName")) $("activePoolName").textContent = settings.name || "My Pool";
   const surface = normalizedSurface(settings.surface) || poolDefaults[defaultProfileKey].surface;
   setValue("surfaceType", surface);
-  setRadio("sanitizer", settings.sanitizer || "chlorine");
+  setRadio("sanitizer", normalizedSanitizer(settings.sanitizer || "chlorine"));
   setTargetInputs(settings.targets || currentDefaultTargets());
   lastPoolKey = key;
   updateVisibility();
@@ -872,7 +853,6 @@ function updateVisibility() {
   const sanitizer = selected("sanitizer");
   const isBromine = sanitizer === "bromine";
   const isFull = true;
-  const isSalt = usesSaltReading();
   const cyaAllowed = activePoolAllowsCya();
 
   all(".chlorine-field").forEach((node) => node.classList.toggle("is-hidden", isBromine));
@@ -883,8 +863,6 @@ function updateVisibility() {
   all(".full-test").forEach((node) => node.classList.toggle("is-hidden", !isFull));
   all(".cya-field").forEach((node) => node.classList.toggle("is-hidden", !isFull || !cyaAllowed));
   all(".target-cya").forEach((node) => node.classList.toggle("is-hidden", !cyaAllowed));
-  all(".salt-field").forEach((node) => node.classList.toggle("is-hidden", !isFull || !isSalt));
-  all(".target-salt").forEach((node) => node.classList.toggle("is-hidden", !isSalt));
 
   if ($("poolVolumeDisplay")) $("poolVolumeDisplay").textContent = formatPoolVolume(currentPoolVolumeLitres());
 }
@@ -928,6 +906,12 @@ function loadState() {
       ...makeDefaultProfileSettings(),
       ...(state.profiles || state.profileSettings || {})
     };
+    Object.entries(profileSettings).forEach(([key, profile]) => {
+      profileSettings[key] = {
+        ...profile,
+        sanitizer: normalizedSanitizer(profile.sanitizer)
+      };
+    });
     customChemicals = normalizeCustomChemicals(state.customChemicals);
 
     const activePool = profileSettings[state.activePool] ? state.activePool : Object.keys(profileSettings)[0] || defaultProfileKey;
@@ -997,7 +981,6 @@ function calculate({ showResults = false } = {}) {
   calculateAlkalinity(cards, volume, hydrochloricStrength);
   calculateCalcium(cards, volume);
   calculateCya(cards, volume, sanitizer);
-  calculateSalt(cards, volume, sanitizer);
 
   if (cards.length === 0 && hasAnyReading()) {
     cards.push({
@@ -1036,7 +1019,6 @@ function doseCardPriority(card) {
   if (title.includes("alkalinity")) return 20;
   if (title.includes("calcium") || title.includes("hardness")) return 30;
   if (title.includes("stabiliser")) return 40;
-  if (title.includes("salt")) return 50;
   if (title.includes("chlorine") || title.includes("bromine")) return 60;
   return 70;
 }
@@ -1072,7 +1054,7 @@ function equipmentSafetyCard() {
     badge: "watch",
     amount: "Turn off",
     chemical: "heaters, chlorinators, UV",
-    body: "Leave the pump running, but turn off heat pumps, heaters, chlorinators, UV sanitisers, ozone systems, mineral systems and automatic dosing equipment before adding chemicals or salt.",
+    body: "Leave the pump running, but turn off heat pumps, heaters, chlorinators, UV sanitisers, ozone systems, mineral systems and automatic dosing equipment before adding chemicals.",
     effect: "This protects equipment from concentrated chemical and stops automatic systems reacting while the water is mixing.",
     steps: [
       "Keep the circulation pump running.",
@@ -1109,7 +1091,7 @@ function calculateChlorine(cards, volume, liquidStrength, granularStrength) {
         amount: formatVolume(liquidMl),
         chemical: `${formatNumber(liquidStrength, 1)}% ${liquidName}`,
         body: `Free chlorine is below the acceptable range of ${formatNumber(chlorineRange.min, 1)}-${formatNumber(chlorineRange.max, 1)}${unit}. Raises it by about ${formatNumber(delta, 1)}${unit} to the desired ${formatNumber(target, 1)}${unit}.`,
-        effect: "Raises the active sanitiser residual. Liquid chlorine can also slowly add salt and nudge pH upward.",
+        effect: "Raises the active sanitiser residual. Liquid chlorine can also nudge pH upward.",
         steps: [
           `Add ${formatVolume(liquidMl)} ${liquidName} with the pump running.`,
           "Circulate, then retest free and total chlorine.",
@@ -1554,60 +1536,6 @@ function calculateCya(cards, volume, sanitizer) {
   }
 }
 
-function calculateSalt(cards, volume, sanitizer) {
-  const current = numberValue("salt");
-  if (current === null || (sanitizer !== "salt" && sanitizer !== "mineral")) return;
-
-  const targets = targetsFromInputs();
-  const target = targets.salt;
-  const range = targets.ranges.salt;
-  const systemName = sanitizer === "mineral" ? "mineral system" : "salt chlorinator";
-  const unit = concentrationUnitSuffix();
-  const saltName = chemicalName("saltName", "pool salt");
-
-  if (current < range.min) {
-    const delta = target - current;
-    cards.push({
-      title: "Salt is low",
-      badge: "watch",
-      amount: "Check manual",
-      chemical: saltName,
-      body: `Salt is below the acceptable range of ${formatNumber(range.min, 0)}-${formatNumber(range.max, 0)}${unit} and about ${formatNumber(delta, 0)}${unit} under the desired target. Confirm the ${systemName} manual before adding salt.`,
-      effect: `Increases salinity so the ${systemName} can operate correctly.`,
-      steps: [
-        "Do not add one large calculated amount from the app.",
-        `Use the ${systemName} manual or salt-bag chart for the exact amount, then add in smaller stages.`,
-        "Brush/circulate until dissolved, then retest salt before adding more.",
-        `Low salt can stop the ${systemName} working properly.`
-      ]
-    });
-  } else if (current > range.max) {
-    cards.push({
-      title: "Salt is high",
-      badge: "watch",
-      amount: "Dilute only",
-      chemical: "water replacement",
-      body: `Salt is above the acceptable range of ${formatNumber(range.min, 0)}-${formatNumber(range.max, 0)}${unit}. Confirm the ${systemName} operating range before making changes.`,
-      effect: "Dilutes salinity; salt cannot be chemically removed from the water.",
-      steps: [
-        "Do not add more salt or mineral product.",
-        "Partial water replacement is the usual correction if the level is outside the equipment range.",
-        `Circulate, then retest salt before adjusting the ${systemName}.`,
-        "High salt usually comes from over-salting, evaporation, or liquid chlorine build-up."
-      ]
-    });
-  } else {
-    cards.push(okRangeCard(
-      "Salt ok",
-      current,
-      range,
-      0,
-      unit,
-      "Salt is within the saved acceptable range."
-    ));
-  }
-}
-
 function renderPendingResults(message) {
   const results = $("results");
   if (!results) return;
@@ -1739,7 +1667,6 @@ const readingLabels = {
   alkalinity: "Alkalinity",
   calcium: "Calcium hardness",
   cya: "Stabiliser",
-  salt: "Salt",
   waterTemperature: "Temperature"
 };
 
@@ -1755,8 +1682,7 @@ const concentrationReadingIds = new Set([
   "bromine",
   "alkalinity",
   "calcium",
-  "cya",
-  "salt"
+  "cya"
 ]);
 
 function loadHistory() {
@@ -1798,7 +1724,6 @@ function currentTargetSnapshot() {
     alkalinity: targets.alkalinity,
     calcium: targets.calcium,
     cya: targets.cya,
-    salt: targets.salt,
     ranges: targets.ranges
   };
 }
@@ -1812,7 +1737,7 @@ function historyBaseEntry(kind) {
     poolName: currentPool().name,
     volumeLitres: poolVolumeLitres(),
     displayedVolume: formatPoolVolume(poolVolumeLitres()),
-    sanitizer: selected("sanitizer"),
+    sanitizer: normalizedSanitizer(selected("sanitizer")),
     surface: normalizedSurface($("surfaceType").value)
   };
 }
@@ -2023,7 +1948,7 @@ function readingExportValue(entry, id) {
 
 function targetExportValue(entry, id) {
   if (!entry.targets || !Number.isFinite(entry.targets[id])) return "";
-  const unitIds = new Set(["chlorine", "combined", "bromine", "alkalinity", "calcium", "cya", "salt"]);
+  const unitIds = new Set(["chlorine", "combined", "bromine", "alkalinity", "calcium", "cya"]);
   const digits = id === "combined" ? 2 : id === "ph" ? 1 : 0;
   const unit = unitIds.has(id) ? concentrationUnitSuffix() : "";
   return `${formatTruncatedDecimal(entry.targets[id], digits)}${unit}`;
@@ -2045,7 +1970,6 @@ function historyCsvContent() {
     "Alkalinity",
     "Calcium hardness",
     "Stabiliser",
-    "Salt",
     "Temperature",
     "Target chlorine",
     "Target combined",
@@ -2054,7 +1978,6 @@ function historyCsvContent() {
     "Target alkalinity",
     "Target calcium",
     "Target stabiliser",
-    "Target salt",
     "Chemical additions",
     "Notes"
   ];
@@ -2082,7 +2005,6 @@ function historyCsvContent() {
       readingExportValue(entry, "alkalinity"),
       readingExportValue(entry, "calcium"),
       readingExportValue(entry, "cya"),
-      readingExportValue(entry, "salt"),
       readingExportValue(entry, "waterTemperature"),
       targetExportValue(entry, "chlorine"),
       targetExportValue(entry, "combined"),
@@ -2091,7 +2013,6 @@ function historyCsvContent() {
       targetExportValue(entry, "alkalinity"),
       targetExportValue(entry, "calcium"),
       targetExportValue(entry, "cya"),
-      targetExportValue(entry, "salt"),
       additions,
       notes
     ];
@@ -2568,7 +2489,7 @@ if (typeof window !== "undefined") {
 
 if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js?v=20260703-splash-mute", {
+    navigator.serviceWorker.register("service-worker.js?v=20260703-cleanup", {
       updateViaCache: "none"
     }).catch(() => {});
   });

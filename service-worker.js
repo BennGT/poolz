@@ -1,8 +1,9 @@
-const CACHE_NAME = "my-pool-pal-dose-v35";
-const ASSET_VERSION = "20260703-splash-mute";
+const CACHE_NAME = "my-pool-pal-dose-v36";
+const ASSET_VERSION = "20260703-cleanup";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./privacy-policy.html",
   `./styles.css?v=${ASSET_VERSION}`,
   `./app.js?v=${ASSET_VERSION}`,
   `./manifest.webmanifest?v=${ASSET_VERSION}`,

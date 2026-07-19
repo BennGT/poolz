@@ -10,12 +10,12 @@
     <meta name="application-name" content="My Pool Pal">
     <meta name="description" content="My Pool Pal pool chemistry and dosing calculator.">
     <title>My Pool Pal</title>
-    <link rel="manifest" href="manifest.webmanifest?v=20260703-splash-mute">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260703-splash-mute">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260703-splash-mute">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260703-splash-mute">
-    <link rel="stylesheet" href="styles.css?v=20260703-splash-mute">
-    <script defer src="app.js?v=20260703-splash-mute"></script>
+    <link rel="manifest" href="manifest.webmanifest?v=20260703-cleanup">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/app-icon-32.png?v=20260703-cleanup">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/app-icon-192.png?v=20260703-cleanup">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon-180.png?v=20260703-cleanup">
+    <link rel="stylesheet" href="styles.css?v=20260703-cleanup">
+    <script defer src="app.js?v=20260703-cleanup"></script>
   </head>
   <body>
     <div id="mobileSplash" class="mobile-splash" aria-hidden="true">
@@ -32,12 +32,12 @@
             <path d="M13 9l5 5"></path>
           </svg>
         </button>
-        <img src="assets/poolz-logo.png?v=20260703-splash-mute" alt="">
+        <img src="assets/poolz-logo.png?v=20260703-cleanup" alt="">
         <div>
           <p>Use your preferred testing method, enter your water readings, and receive instant chemical dosing recommendations</p>
           <p class="disclaimer-text">Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</p>
         </div>
-        <audio id="splashSound" preload="auto" src="assets/splash.mp3?v=20260703-splash-mute"></audio>
+        <audio id="splashSound" preload="auto" src="assets/splash.mp3?v=20260703-cleanup"></audio>
       </div>
     </div>
 
@@ -50,7 +50,7 @@
         </button>
 
         <div class="brand">
-          <img class="brand-logo" src="assets/poolz-logo.png?v=20260703-splash-mute" alt="My Pool Pal">
+          <img class="brand-logo" src="assets/poolz-logo.png?v=20260703-cleanup" alt="My Pool Pal">
           <h1>My Pool Pal</h1>
         </div>
       </div>
@@ -232,7 +232,6 @@
               <fieldset class="segmented sanitizer-segment" aria-label="Pool type">
                 <legend>Pool type</legend>
                 <label><input type="radio" name="sanitizer" value="chlorine" checked><span>Chlorine</span></label>
-                <label><input type="radio" name="sanitizer" value="salt"><span>Salt</span></label>
                 <label><input type="radio" name="sanitizer" value="mineral"><span>Mineral</span></label>
                 <label><input type="radio" name="sanitizer" value="bromine"><span>Bromine</span></label>
               </fieldset>
@@ -251,10 +250,6 @@
         <div class="layout">
           <section class="workbench" aria-label="Pool chemistry inputs">
             <section class="panel">
-              <div class="page-guide calculator-guide">
-                <p>Use your preferred testing method, enter your water readings, and receive instant chemical dosing recommendations</p>
-              </div>
-
               <div class="section-title test-results-title">
                 <div>
                   <h2>Enter test results</h2>
@@ -307,11 +302,6 @@
                 <label class="field full-test cya-field">
                   <span>Stabiliser / CYA</span>
                   <input id="cya" type="number" min="0" step="1" inputmode="decimal">
-                </label>
-
-                <label class="field full-test salt-field">
-                  <span>Salt</span>
-                  <input id="salt" type="number" min="0" step="10" inputmode="decimal">
                 </label>
 
                 <label class="field">
@@ -510,21 +500,6 @@
                 </label>
               </div>
 
-              <div class="target-range-card target-salt">
-                <span class="target-name">Salt</span>
-                <label class="field">
-                  <span>Desired</span>
-                  <input id="targetSalt" type="number" min="0" step="10" value="4000">
-                </label>
-                <label class="field">
-                  <span>Min ok</span>
-                  <input id="targetSaltMin" type="number" min="0" step="10" value="3000">
-                </label>
-                <label class="field">
-                  <span>Max ok</span>
-                  <input id="targetSaltMax" type="number" min="0" step="10" value="5000">
-                </label>
-              </div>
             </div>
 
             <div class="form-actions">
@@ -615,10 +590,6 @@
                 <input id="stabilizerPurity" type="number" min="1" max="100" step="0.1" value="100">
               </label>
 
-              <label class="field">
-                <span>Salt name</span>
-                <input id="saltName" type="text" value="Pool salt" autocomplete="off">
-              </label>
             </div>
 
             <section class="custom-chemicals" aria-labelledby="customChemicalsTitle">
@@ -652,7 +623,6 @@
                   <option value="alkalinity">Alkalinity</option>
                   <option value="calcium">Calcium hardness</option>
                   <option value="cya">Stabiliser</option>
-                  <option value="salt">Salt</option>
                   <option value="waterTemperature">Temperature</option>
                 </select>
                 <button id="shareHistory" class="secondary-button" type="button">Share / email CSV</button>
@@ -684,8 +654,11 @@
             </div>
 
             <div class="notes-grid safety-grid">
+              <article class="disclaimer-card">
+                <span>Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</span>
+              </article>
               <article class="warning-note">
-                <span>Before adding chemicals or salt, leave the pump running but turn off heat pumps, heaters, chlorinators, UV sanitisers, ozone systems, mineral systems, and automatic dosing equipment. This protects equipment from concentrated chemical and stops automatic systems reacting while the water is mixing.</span>
+                <span>Before adding chemicals, leave the pump running but turn off heat pumps, heaters, chlorinators, UV sanitisers, ozone systems, mineral systems, and automatic dosing equipment. This protects equipment from concentrated chemical and stops automatic systems reacting while the water is mixing.</span>
               </article>
               <article class="warning-note">
                 <span>Indoor pools often avoid cyanuric acid. Follow local rules and product labels.</span>
@@ -701,9 +674,6 @@
               </article>
               <article>
                 <span>Retest before redosing, especially after acid, chlorine or large corrections.</span>
-              </article>
-              <article class="disclaimer-card">
-                <span>Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</span>
               </article>
             </div>
           </section>
