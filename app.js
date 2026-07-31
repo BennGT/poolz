@@ -172,6 +172,7 @@ let clearReadingsAfterDismiss = false;
 let historyEntries = [];
 let customChemicals = [];
 let customChemicalCounter = 0;
+let hideEquipmentSafetyCard = false;
 
 const $ = (id) => document.getElementById(id);
 const all = (selector) => Array.from(document.querySelectorAll(selector));
@@ -882,6 +883,7 @@ function saveState() {
     concentrationUnit: selected("concentrationUnit"),
     profiles: profileSettings,
     customChemicals: customChemicals.filter(customChemicalHasContent),
+    hideEquipmentSafetyCard,
     values: {}
   };
 
@@ -925,6 +927,8 @@ function loadState() {
     setRadio("testSet", "full");
     if (state.unitSystem) setRadio("unitSystem", state.unitSystem);
     if (state.concentrationUnit) setRadio("concentrationUnit", state.concentrationUnit);
+    hideEquipmentSafetyCard = Boolean(state.hideEquipmentSafetyCard);
+    if ($("hideEquipmentSafetyCard")) $("hideEquipmentSafetyCard").checked = hideEquipmentSafetyCard;
     syncConcentrationUnitControls();
     applyPoolProfile(currentPoolKey());
 
@@ -998,7 +1002,7 @@ function calculate({ showResults = false } = {}) {
     });
   }
 
-  if (needsEquipmentSafety(cards)) {
+  if (!hideEquipmentSafetyCard && needsEquipmentSafety(cards)) {
     cards.unshift(equipmentSafetyCard());
   }
 
@@ -1297,8 +1301,20 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
     const alkalinityIsHigh = alkalinity !== null && alkalinity > alkalinityRange.max;
 
     if (alkalinityIsLow) {
-      // Alkalinity dosing handles this staged correction. Avoid showing a second
-      // pH dose that uses the same buffer amount.
+      cards.push({
+        title: "pH is low",
+        badge: "watch",
+        amount: "No pH dose yet",
+        chemical: "raise alkalinity first",
+        body: `pH is ${formatNumber(ph, 1)}, below the acceptable range of ${formatNumber(range.min, 1)}-${formatNumber(range.max, 1)}, and alkalinity is also low. Raise alkalinity first, then retest before using ${phIncreaserName}.`,
+        effect: "Low alkalinity makes pH unstable. Fixing alkalinity first can lift and stabilise pH, so adding pH increaser now could over-correct the water.",
+        steps: [
+          "Do not add a separate pH increaser dose yet.",
+          `Follow the alkalinity card first using ${alkalinityName}.`,
+          "Circulate, then retest pH and alkalinity.",
+          `Only calculate ${phIncreaserName} on the next test if pH is still below range.`
+        ]
+      });
       return;
     }
 
@@ -2443,6 +2459,12 @@ function bindEvents() {
   });
   $("calculateButton").addEventListener("click", handleCalculatePress);
   $("saveTestLog").addEventListener("click", saveTestLog);
+  if ($("hideEquipmentSafetyCard")) {
+    $("hideEquipmentSafetyCard").addEventListener("change", () => {
+      hideEquipmentSafetyCard = $("hideEquipmentSafetyCard").checked;
+      calculate({ showResults: resultsVisible });
+    });
+  }
   $("historyMetric").addEventListener("change", renderHistory);
   if ($("exportHistory")) $("exportHistory").addEventListener("click", downloadHistoryExport);
   if ($("shareHistory")) $("shareHistory").addEventListener("click", shareHistoryExport);
