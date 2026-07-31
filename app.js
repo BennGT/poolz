@@ -1297,20 +1297,8 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
     const alkalinityIsHigh = alkalinity !== null && alkalinity > alkalinityRange.max;
 
     if (alkalinityIsLow) {
-      cards.push({
-        title: "pH is low",
-        badge: "dose",
-        amount: formatMass(bicarbForAlkalinity(volume, alkalinityTarget - alkalinity)),
-        chemical: alkalinityName,
-        body: `pH is ${formatNumber(ph, 1)} and alkalinity is also low. Raise alkalinity first, because that can gently lift pH too.`,
-        effect: "Alkalinity buffers pH. Sodium bicarbonate mainly raises alkalinity and only nudges pH, so retesting avoids double dosing.",
-        steps: [
-          `Add ${formatMass(bicarbForAlkalinity(volume, alkalinityTarget - alkalinity))} ${alkalinityName} with circulation.`,
-          "Circulate, then retest pH and alkalinity.",
-          `If pH is still low after alkalinity is back in range, use a small staged dose of ${phIncreaserName} and retest before adding more.`,
-          "Non-chemical option: aerate by running the pump, pointing return jets upward to ripple the surface, and turning on water features, spa jets, or an air blower if fitted."
-        ]
-      });
+      // Alkalinity dosing handles this staged correction. Avoid showing a second
+      // pH dose that uses the same buffer amount.
       return;
     }
 
@@ -1378,7 +1366,7 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
   if (current < range.min) {
     const delta = target - current;
     const phNote = ph !== null && ph < phRange.min
-      ? " pH is also low, so retest pH after this before adding any pH increaser."
+      ? " pH is also low, so this is the first staged correction. Do not add pH increaser at the same time; retest pH after alkalinity is back in range."
       : "";
     if (ph !== null && ph > phRange.max) {
       cards.push({
@@ -1406,7 +1394,7 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
       steps: [
         `Add ${formatMass(bicarbForAlkalinity(volume, delta))} ${alkalinityName} with circulation.`,
         "Retest alkalinity and pH after mixing.",
-        "If pH still needs raising after alkalinity is in range, use a small staged pH increaser dose and retest.",
+        "If pH still needs raising after alkalinity is in range, calculate a small pH increaser dose on the next test.",
         "Non-chemical option: aerate by running the pump, pointing return jets upward, and turning on water features, spa jets, or an air blower if fitted.",
         "Low alkalinity makes pH unstable and is often caused by acid or dilution."
       ]
@@ -1767,9 +1755,15 @@ function saveTestLog() {
     readings,
     targets: currentTargetSnapshot()
   });
-  clearReadingsAfterDismiss = resultsVisible;
+  clearReadingsAfterDismiss = false;
+  resultsVisible = false;
+  lastCards = [];
+  clearReadings();
+  renderPendingResults("Enter readings and press Calculate.");
   saveHistory();
   updateHistoryExportButtons();
+  saveState();
+  showPage("home");
 }
 
 function isChemicalAddition(card) {
