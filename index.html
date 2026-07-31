@@ -64,8 +64,8 @@
         <button id="drawerClose" class="icon-close" type="button" aria-label="Close menu"></button>
       </div>
       <button class="drawer-link is-active" type="button" data-nav-page="home">Home</button>
-      <button class="drawer-link" type="button" data-nav-page="calculator">Chemical calculator</button>
       <button class="drawer-link" type="button" data-nav-page="pools">My Pool</button>
+      <button class="drawer-link" type="button" data-nav-page="calculator">Chemical calculator</button>
       <button class="drawer-link" type="button" data-nav-page="volume">Volume calculator</button>
       <button class="drawer-link" type="button" data-nav-page="targets">Edit targets</button>
       <button class="drawer-link" type="button" data-nav-page="chemicals">Edit chemicals</button>
@@ -85,6 +85,18 @@
           </section>
 
           <nav class="home-nav-grid" aria-label="App sections">
+            <button class="home-nav-card" type="button" data-nav-page="pools">
+              <span class="home-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" focusable="false">
+                  <path d="M8 29c5 0 5-3 10-3s5 3 10 3 5-3 12-3"></path>
+                  <path d="M8 37c5 0 5-3 10-3s5 3 10 3 5-3 12-3"></path>
+                  <path d="M12 22V10h24v12"></path>
+                  <path d="M18 22v-6h12v6"></path>
+                </svg>
+              </span>
+              <strong>My Pool</strong>
+            </button>
+
             <button class="home-nav-card" type="button" data-nav-page="calculator">
               <span class="home-icon" aria-hidden="true">
                 <svg viewBox="0 0 48 48" focusable="false">
@@ -99,18 +111,6 @@
                 </svg>
               </span>
               <strong>Chemical calculator</strong>
-            </button>
-
-            <button class="home-nav-card" type="button" data-nav-page="pools">
-              <span class="home-icon" aria-hidden="true">
-                <svg viewBox="0 0 48 48" focusable="false">
-                  <path d="M8 29c5 0 5-3 10-3s5 3 10 3 5-3 12-3"></path>
-                  <path d="M8 37c5 0 5-3 10-3s5 3 10 3 5-3 12-3"></path>
-                  <path d="M12 22V10h24v12"></path>
-                  <path d="M18 22v-6h12v6"></path>
-                </svg>
-              </span>
-              <strong>My Pool</strong>
             </button>
 
             <button class="home-nav-card" type="button" data-nav-page="volume">
@@ -200,7 +200,7 @@
               </label>
 
               <label class="field profile-name-field">
-                <span>Profile name</span>
+                <span>Pool name</span>
                 <input id="profileName" type="text" value="My Pool" autocomplete="off">
               </label>
 
@@ -315,6 +315,8 @@
           <aside class="results-panel" aria-label="Dose results">
             <div id="results" class="results-list"></div>
 
+            <p class="results-disclaimer disclaimer-text">Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</p>
+
             <div class="results-actions">
               <button id="calculateButton" class="primary-button" type="button">Calculate</button>
               <button id="saveTestLog" class="secondary-button" type="button">Save test log</button>
@@ -322,7 +324,6 @@
 
           </aside>
         </div>
-        <p class="page-bottom-disclaimer disclaimer-text">Disclaimer: Recommendations are provided as a general guide only. Always follow product label instructions and seek advice from a qualified pool or water treatment professional when needed.</p>
       </section>
 
       <section id="page-volume" class="app-page" data-page-panel="volume">
@@ -556,6 +557,11 @@
               </label>
 
               <label class="field">
+                <span>pH increaser name</span>
+                <input id="phIncreaserName" type="text" value="Soda ash / pH increaser" autocomplete="off">
+              </label>
+
+              <label class="field">
                 <span>Alkalinity increaser name</span>
                 <input id="phUpName" type="text" value="Sodium bicarbonate" autocomplete="off">
               </label>
@@ -592,14 +598,6 @@
 
             </div>
 
-            <section class="custom-chemicals" aria-labelledby="customChemicalsTitle">
-              <div class="custom-chemicals-head">
-                <h3 id="customChemicalsTitle">Custom chemicals</h3>
-                <button id="addCustomChemical" class="secondary-button light-blue-button" type="button">Add chemical</button>
-              </div>
-              <div id="customChemicalsList" class="custom-chemicals-list"></div>
-            </section>
-
             <div class="form-actions">
               <button id="saveChemicals" class="primary-button" type="button">Save chemicals</button>
             </div>
@@ -625,7 +623,6 @@
                   <option value="cya">Stabiliser</option>
                   <option value="waterTemperature">Temperature</option>
                 </select>
-                <button id="shareHistory" class="secondary-button" type="button">Share / email CSV</button>
                 <button id="clearHistory" class="secondary-button" type="button">Clear history</button>
               </div>
             </div>

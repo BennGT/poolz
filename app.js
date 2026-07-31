@@ -53,6 +53,7 @@ const valueIds = [
   "acidName",
   "muriaticStrength",
   "dryAcidName",
+  "phIncreaserName",
   "phUpName",
   "bromineName",
   "bromineStrength",
@@ -203,7 +204,7 @@ function renderProfileOptions(selectedKey = currentPoolKey()) {
   Object.entries(profileSettings).forEach(([key, profile]) => {
     const option = document.createElement("option");
     option.value = key;
-    option.textContent = profile.name || "My Pool";
+    option.textContent = profile.name ?? "";
     select.append(option);
   });
 
@@ -637,6 +638,10 @@ function bicarbForAlkalinity(volumeLitres, ppmDelta) {
   return ppmDelta * volumeLitres * 0.00168;
 }
 
+function phIncreaserForPh(volumeLitres, phRise) {
+  return 22.5 * (volumeLitres / 10000) * (phRise / 0.1);
+}
+
 function acidForAlkalinity(volumeLitres, ppmDelta, strength) {
   const standardStrength = 31.45;
   return 946 * (volumeLitres / 37854) * (ppmDelta / 10) * (standardStrength / strength);
@@ -818,7 +823,7 @@ function setTargetsFromProfile() {
 function savePoolSettings(key = currentPoolKey()) {
   const existing = profileSettings[key] || {};
   const surface = normalizedSurface($("surfaceType").value);
-  const name = $("profileName").value.trim() || existing.name || "My Pool";
+  const name = $("profileName").value.trim();
   const volume = poolVolumeInputToLitres();
   profileSettings[key] = {
     ...existing,
@@ -837,8 +842,8 @@ function applyPoolProfile(key = currentPoolKey()) {
   setValue("poolVolume", volume ? Math.round(litresToSelectedVolume(volume)) : "");
   updatePoolVolumeExample();
   if ($("poolVolumeDisplay")) $("poolVolumeDisplay").textContent = formatPoolVolume(volume);
-  setValue("profileName", settings.name || "My Pool");
-  if ($("activePoolName")) $("activePoolName").textContent = settings.name || "My Pool";
+  setValue("profileName", settings.name ?? "");
+  if ($("activePoolName")) $("activePoolName").textContent = settings.name ?? "";
   const surface = normalizedSurface(settings.surface) || poolDefaults[defaultProfileKey].surface;
   setValue("surfaceType", surface);
   setRadio("sanitizer", normalizedSanitizer(settings.sanitizer || "chlorine"));
@@ -1245,6 +1250,8 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
   const alkalinityRange = targets.ranges.alkalinity;
   const acidName = chemicalName("acidName", "hydrochloric acid");
   const dryAcidName = chemicalName("dryAcidName", "dry acid");
+  const phIncreaserName = chemicalName("phIncreaserName", "soda ash / pH increaser");
+  const alkalinityName = chemicalName("phUpName", "sodium bicarbonate");
 
   if (ph === null) return;
 
@@ -1256,9 +1263,9 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
         amount: "Stage with alkalinity",
         chemical: "acid dosing",
         body: `pH is above the acceptable range of ${formatNumber(range.min, 1)}-${formatNumber(range.max, 1)}, and alkalinity is also high. Lower alkalinity first so you do not double-dose acid.`,
-        effect: "Lowering alkalinity uses acid and aeration cycles, which also corrects high pH in stages.",
+        effect: "Acid lowers pH and also lowers alkalinity. Staging the acid prevents over-correcting both readings at once.",
         steps: [
-          "Lower alkalinity first with staged acid and aeration.",
+          "Lower alkalinity first with staged acid doses.",
           "Do not add a separate full pH acid dose at the same time.",
           "Retest pH and alkalinity between stages before adding more acid."
         ]
@@ -1292,15 +1299,16 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
     if (alkalinityIsLow) {
       cards.push({
         title: "pH is low",
-        badge: "watch",
-        amount: "Fix alkalinity first",
-        chemical: "then retest pH",
+        badge: "dose",
+        amount: formatMass(bicarbForAlkalinity(volume, alkalinityTarget - alkalinity)),
+        chemical: alkalinityName,
         body: `pH is ${formatNumber(ph, 1)} and alkalinity is also low. Raise alkalinity first, because that can gently lift pH too.`,
         effect: "Alkalinity buffers pH. Sodium bicarbonate mainly raises alkalinity and only nudges pH, so retesting avoids double dosing.",
         steps: [
-          "Raise alkalinity first.",
+          `Add ${formatMass(bicarbForAlkalinity(volume, alkalinityTarget - alkalinity))} ${alkalinityName} with circulation.`,
           "Circulate, then retest pH and alkalinity.",
-          "If pH is still low after alkalinity is back in range, aerate first by running the pump, pointing return jets upward to ripple the surface, and turning on water features, spa jets, or an air blower if fitted."
+          `If pH is still low after alkalinity is back in range, use a small staged dose of ${phIncreaserName} and retest before adding more.`,
+          "Non-chemical option: aerate by running the pump, pointing return jets upward to ripple the surface, and turning on water features, spa jets, or an air blower if fitted."
         ]
       });
       return;
@@ -1310,31 +1318,34 @@ function calculatePh(cards, volume, alkalinity, hydrochloricStrength) {
       cards.push({
         title: "pH is low",
         badge: "watch",
-        amount: "Aerate pool water",
-        chemical: "while lowering alkalinity",
-        body: `pH is ${formatNumber(ph, 1)} but alkalinity is high. Avoid pH-up or buffer products for now.`,
-        effect: "The alkalinity process uses acid to reduce buffering, then aeration raises pH without adding alkalinity back.",
+        amount: "Stage corrections",
+        chemical: "lower alkalinity first",
+        body: `pH is ${formatNumber(ph, 1)} but alkalinity is high. Avoid pH-up or buffer products for now because they can push alkalinity higher.`,
+        effect: "Acid lowers alkalinity and pH, so use smaller staged corrections and retest before any pH increaser.",
         steps: [
-          "Lower alkalinity first in small staged acid and aeration steps.",
-          "Aerate strongly between acid stages: run the pump, point return jets upward, and turn on water features, spa jets, or an air blower if fitted.",
-          "Retest pH and alkalinity before adding any pH increaser."
+          "Lower alkalinity first in small staged acid doses.",
+          "Retest pH and alkalinity before adding any pH increaser.",
+          `Only use ${phIncreaserName} after alkalinity is back near range and pH is still low.`,
+          "Non-chemical option between stages: aerate by running the pump, pointing return jets upward, and turning on water features, spa jets, or an air blower if fitted."
         ]
       });
       return;
     }
 
+    const rise = target - ph;
+    const phUpDose = phIncreaserForPh(volume, rise);
     cards.push({
       title: "Raise pH",
-      badge: "watch",
-      amount: "Aerate pool water first",
-      chemical: "pH increaser if needed",
-      body: `pH is below the acceptable range of ${formatNumber(range.min, 1)}-${formatNumber(range.max, 1)}. Raise it toward the desired ${formatNumber(target, 1)} without chasing alkalinity at the same time.`,
-      effect: "Aeration raises pH without adding chemicals. pH increaser/soda ash raises pH faster but can also raise alkalinity.",
+      badge: "dose",
+      amount: formatMass(phUpDose),
+      chemical: phIncreaserName,
+      body: `pH is below the acceptable range of ${formatNumber(range.min, 1)}-${formatNumber(range.max, 1)}. Use a small staged pH increaser dose toward the desired ${formatNumber(target, 1)} and retest before adding more.`,
+      effect: "pH increaser raises pH. It can also raise alkalinity, so staged dosing avoids overshooting.",
       steps: [
-        "Run the pump and point return jets upward so the surface ripples.",
-        "Turn on water features, spa jets, fountains, deck jets, or an air blower if fitted.",
-        "Retest pH before adding a chemical pH increaser.",
+        `Add ${formatMass(phUpDose)} ${phIncreaserName} with the pump running.`,
+        "Circulate and retest pH before adding more.",
         "Avoid using sodium bicarbonate for pH-only correction unless alkalinity is also low.",
+        "Non-chemical option: aerate by running the pump, pointing return jets upward to ripple the surface, and turning on water features, spa jets, or an air blower if fitted.",
         "Low pH is often from acid overdose, rain/dilution, or low alkalinity."
       ]
     });
@@ -1395,7 +1406,8 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
       steps: [
         `Add ${formatMass(bicarbForAlkalinity(volume, delta))} ${alkalinityName} with circulation.`,
         "Retest alkalinity and pH after mixing.",
-        "If pH still needs raising after alkalinity is in range, aerate first by running the pump, pointing return jets upward, and turning on water features, spa jets, or an air blower if fitted.",
+        "If pH still needs raising after alkalinity is in range, use a small staged pH increaser dose and retest.",
+        "Non-chemical option: aerate by running the pump, pointing return jets upward, and turning on water features, spa jets, or an air blower if fitted.",
         "Low alkalinity makes pH unstable and is often caused by acid or dilution."
       ]
     });
@@ -1408,12 +1420,13 @@ function calculateAlkalinity(cards, volume, hydrochloricStrength) {
       badge: "watch",
       amount: formatVolume(hydrochloric),
       chemical: `${acidName} total`,
-      body: `Alkalinity is above the acceptable range of ${formatNumber(range.min, 0)}-${formatNumber(range.max, 0)}${unit}. Use staged acid and aeration cycles to move toward the desired ${formatNumber(target, 0)}${unit}; this is not a single-dose instruction.`,
-      effect: "Acid lowers total alkalinity and pH. Aeration then raises pH back up without raising alkalinity again.",
+      body: `Alkalinity is above the acceptable range of ${formatNumber(range.min, 0)}-${formatNumber(range.max, 0)}${unit}. Use staged acid doses to move toward the desired ${formatNumber(target, 0)}${unit}; this is not a single-dose instruction.`,
+      effect: "Acid lowers total alkalinity and pH. Retesting between stages helps prevent the pH from dropping too far.",
       steps: [
         "Add acid in smaller staged doses to lower alkalinity.",
-        "Aerate strongly to raise pH back up without adding buffer: run the pump, point return jets upward, and turn on water features, spa jets, or an air blower if fitted.",
         "Retest pH and alkalinity between stages.",
+        "If pH drops below range, pause acid dosing and correct pH before continuing.",
+        "Non-chemical option to help lift pH without raising alkalinity: aerate by running the pump, pointing return jets upward, and turning on water features, spa jets, or an air blower if fitted.",
         "High alkalinity usually comes from source water, too much buffer, or pH-up products."
       ],
       alt: [`${dryAcidName} equivalent: ${formatMass(dryAcid)}.`]
@@ -1756,6 +1769,7 @@ function saveTestLog() {
   });
   clearReadingsAfterDismiss = resultsVisible;
   saveHistory();
+  updateHistoryExportButtons();
 }
 
 function isChemicalAddition(card) {
@@ -2437,7 +2451,7 @@ function bindEvents() {
   $("saveTestLog").addEventListener("click", saveTestLog);
   $("historyMetric").addEventListener("change", renderHistory);
   if ($("exportHistory")) $("exportHistory").addEventListener("click", downloadHistoryExport);
-  $("shareHistory").addEventListener("click", shareHistoryExport);
+  if ($("shareHistory")) $("shareHistory").addEventListener("click", shareHistoryExport);
   $("clearHistory").addEventListener("click", clearHistory);
   if ($("installAppButton")) $("installAppButton").addEventListener("click", promptInstallApp);
   all("[data-install-platform]").forEach((button) => {

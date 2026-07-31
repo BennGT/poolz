@@ -1,0 +1,20 @@
+{
+  "name": "my-pool-pal",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "My Pool Pal chemical dosing calculator packaged for Android with Capacitor.",
+  "scripts": {
+    "build": "node tools/build-capacitor-web.mjs",
+    "cap:sync:android": "npm run build && npx cap sync android",
+    "cap:open:android": "npx cap open android",
+    "cap:run:android": "npm run build && npx cap run android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/core": "^8.4.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.1"
+  }
+}

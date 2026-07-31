@@ -1,0 +1,8 @@
+{
+  "appId": "com.mypoolpal.app",
+  "appName": "My Pool Pal",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

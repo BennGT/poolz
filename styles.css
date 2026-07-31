@@ -518,7 +518,9 @@ button {
 
 #activePoolName {
   color: var(--teal-dark);
+  font-size: 1.3rem;
   font-weight: 950;
+  line-height: 1.15;
 }
 
 .page-guide {
@@ -883,6 +885,11 @@ details summary strong {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin-top: 12px;
+}
+
+.results-disclaimer {
+  margin: 12px 0 0;
+  text-align: left;
 }
 
 .notes-grid,
